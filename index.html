@@ -1822,6 +1822,61 @@
           </div>
         </div>
       </div>
+
+      <!-- Real-time Cloud Sync Card -->
+      <div class="card" style="padding:1.6rem; display:flex; flex-direction:column; gap:1.2rem; margin-top:1.5rem;">
+        <div>
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+            <div style="display:flex; align-items:center; gap:0.8rem;">
+              <div style="width:44px;height:44px;background:rgba(59,130,246,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;">🔄</div>
+              <div>
+                <h3 style="font-size:1.1rem;font-weight:700;">🔄 Real-time Cloud Sync (Firebase)</h3>
+                <span class="text-muted text-xs">Sync expenses, earnings, leads, and users in real-time</span>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              <span id="sync-badge" class="badge" style="background:rgba(248,113,113,0.1); color:var(--red); border:1px solid rgba(248,113,113,0.2);">Not Configured</span>
+            </div>
+          </div>
+          
+          <p style="color:var(--text-muted);font-size:0.85rem;line-height:1.5;margin-bottom:1.2rem;">
+            Connect this app to a free <strong>Firebase Realtime Database</strong> to share your login credentials, expenses, leads, and earnings automatically across Chrome, Microsoft Edge, or any other browser/device in real-time.
+          </p>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.2rem;">
+            <div>
+              <label class="form-label" style="display:block;margin-bottom:0.4rem;font-size:0.8rem;color:var(--text);font-weight:600;">Firebase Realtime Database URL</label>
+              <input type="text" id="sync-db-url" class="form-input" style="width:100%;" placeholder="https://your-project-default-rtdb.firebaseio.com/" />
+            </div>
+            <div>
+              <label class="form-label" style="display:block;margin-bottom:0.4rem;font-size:0.8rem;color:var(--text);font-weight:600;">Database Auth Secret (Optional)</label>
+              <input type="password" id="sync-db-secret" class="form-input" style="width:100%;" placeholder="Enter auth secret/token or leave empty" />
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:0.5rem;">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+              <input type="checkbox" id="sync-enabled" style="width:18px; height:18px; cursor:pointer;" onchange="toggleSyncEnabledUI(this.checked)" />
+              <label for="sync-enabled" style="font-size:0.85rem; font-weight:600; cursor:pointer; color:var(--text);">Enable Real-time Cloud Sync</label>
+            </div>
+            <div style="font-size:0.75rem; color:var(--text-muted);" id="sync-last-time">
+              Last synced: Never
+            </div>
+          </div>
+
+          <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="saveAndConnectSync()" style="padding:0.75rem 1.5rem; flex:1; min-width:160px; font-weight:600;">
+              Save &amp; Connect Sync
+            </button>
+            <button class="btn btn-ghost" id="btn-force-push" onclick="forcePushSync()" style="padding:0.75rem 1.2rem; border:1px solid rgba(255,255,255,0.1); cursor:not-allowed; font-weight:600;" disabled>
+              Force Push to Cloud
+            </button>
+            <button class="btn btn-ghost" id="btn-force-pull" onclick="forcePullSync()" style="padding:0.75rem 1.2rem; border:1px solid rgba(255,255,255,0.1); cursor:not-allowed; font-weight:600;" disabled>
+              Force Pull from Cloud
+            </button>
+          </div>
+        </div>
+      </div>
     </div><!-- #page-backup-restore -->
 
   </div><!-- #main -->
@@ -2245,6 +2300,7 @@ function loadUsers() {
 }
 function saveUsers(users) {
   localStorage.setItem('sentory1_users', JSON.stringify(users));
+  if (typeof pushDataToCloud === 'function') pushDataToCloud();
 }
 let USERS = loadUsers();
 
@@ -2266,6 +2322,7 @@ function getExpenses() {
 }
 function saveExpenses(data) {
   localStorage.setItem('sentory1_expenses', JSON.stringify(data));
+  if (typeof pushDataToCloud === 'function') pushDataToCloud();
 }
 function genId() {
   return 'exp_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
@@ -3566,6 +3623,7 @@ function getLeads() {
 }
 function saveLeads(data) {
   localStorage.setItem('sentory1_leads', JSON.stringify(data));
+  if (typeof pushDataToCloud === 'function') pushDataToCloud();
 }
 function genLeadId() {
   return 'lead_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
@@ -3825,6 +3883,7 @@ function getEarnings() {
 function saveEarnings(data) {
   try {
     localStorage.setItem('sentory1_earnings', JSON.stringify(data));
+    if (typeof pushDataToCloud === 'function') pushDataToCloud();
   } catch (e) {
     console.error("Error saving earnings:", e);
     showToast('Failed to save data. Storage might be full.', 'error');
@@ -4355,7 +4414,320 @@ function importFullBackup(evt) {
     }
   };
   reader.readAsText(file);
+
+/* ══════════════════════════════════════════════════
+   REAL-TIME CLOUD SYNC (FIREBASE RTDB REST)
+   Allows multi-browser / multi-device sync
+   using fetch requests against a Firebase Database.
+══════════════════════════════════════════════════ */
+let syncConfig = {
+  enabled: false,
+  dbUrl: 'https://sentory1-b71fd-default-rtdb.firebaseio.com/',
+  secret: ''
+};
+let lastFetchedCloudJson = '';
+
+function getFirebaseUrl(path) {
+  let url = syncConfig.dbUrl.trim();
+  if (!url) return null;
+  if (!url.endsWith('/')) url += '/';
+  
+  let fullUrl = url + path + '.json';
+  if (syncConfig.secret) {
+    fullUrl += '?auth=' + encodeURIComponent(syncConfig.secret.trim());
+  }
+  return fullUrl;
 }
+
+async function testFirebaseConnection() {
+  const url = getFirebaseUrl('sentory1_test_connection');
+  if (!url) return false;
+  try {
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ timestamp: Date.now() })
+    });
+    return res.ok;
+  } catch (e) {
+    console.error('Firebase test connection failed:', e);
+    return false;
+  }
+}
+
+function toggleSyncEnabledUI(enabled) {
+  const pushBtn = document.getElementById('btn-force-push');
+  const pullBtn = document.getElementById('btn-force-pull');
+  if (pushBtn) {
+    pushBtn.disabled = !enabled;
+    pushBtn.style.cursor = enabled ? 'pointer' : 'not-allowed';
+  }
+  if (pullBtn) {
+    pullBtn.disabled = !enabled;
+    pullBtn.style.cursor = enabled ? 'pointer' : 'not-allowed';
+  }
+}
+
+function updateSyncBadge(status) {
+  const badge = document.getElementById('sync-badge');
+  if (!badge) return;
+  if (!syncConfig.dbUrl) {
+    badge.textContent = 'Not Configured';
+    badge.style.background = 'rgba(248,113,113,0.1)';
+    badge.style.color = 'var(--red)';
+    badge.style.border = '1px solid rgba(248,113,113,0.2)';
+    return;
+  }
+  if (!syncConfig.enabled) {
+    badge.textContent = 'Disabled';
+    badge.style.background = 'rgba(251,191,36,0.1)';
+    badge.style.color = 'var(--yellow)';
+    badge.style.border = '1px solid rgba(251,191,36,0.2)';
+    return;
+  }
+  if (status === 'connected') {
+    badge.textContent = 'Connected & Synced';
+    badge.style.background = 'rgba(34,211,165,0.1)';
+    badge.style.color = 'var(--green)';
+    badge.style.border = '1px solid rgba(34,211,165,0.2)';
+  } else if (status === 'syncing') {
+    badge.textContent = 'Syncing...';
+    badge.style.background = 'rgba(56,189,248,0.1)';
+    badge.style.color = 'var(--blue)';
+    badge.style.border = '1px solid rgba(56,189,248,0.2)';
+  } else {
+    badge.textContent = 'Connection Error';
+    badge.style.background = 'rgba(248,113,113,0.1)';
+    badge.style.color = 'var(--red)';
+    badge.style.border = '1px solid rgba(248,113,113,0.2)';
+  }
+}
+
+function loadSyncConfig() {
+  try {
+    const saved = localStorage.getItem('sentory1_sync_config');
+    if (saved) {
+      syncConfig = JSON.parse(saved);
+    }
+    const dbUrlInp = document.getElementById('sync-db-url');
+    const dbSecretInp = document.getElementById('sync-db-secret');
+    const enabledCb = document.getElementById('sync-enabled');
+    if (dbUrlInp) dbUrlInp.value = syncConfig.dbUrl || '';
+    if (dbSecretInp) dbSecretInp.value = syncConfig.secret || '';
+    if (enabledCb) {
+      enabledCb.checked = !!syncConfig.enabled;
+      toggleSyncEnabledUI(!!syncConfig.enabled);
+    }
+    updateSyncBadge();
+  } catch (e) {
+    console.error('Error loading sync config:', e);
+  }
+}
+
+async function fetchCloudData() {
+  if (!syncConfig.enabled || !syncConfig.dbUrl) return null;
+  const url = getFirebaseUrl('sentory1_db');
+  if (!url) return null;
+  try {
+    const res = await fetch(url);
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (e) {
+    console.error('Error fetching cloud data:', e);
+  }
+  return null;
+}
+
+async function pushDataToCloud() {
+  if (!syncConfig.enabled || !syncConfig.dbUrl) return;
+  const url = getFirebaseUrl('sentory1_db');
+  if (!url) return;
+
+  const dataToPush = {
+    sentory1_expenses: getExpenses(),
+    sentory1_earnings: getEarnings(),
+    sentory1_leads: getLeads(),
+    sentory1_users: loadUsers()
+  };
+
+  try {
+    updateSyncBadge('syncing');
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dataToPush)
+    });
+    if (res.ok) {
+      updateSyncBadge('connected');
+      const timeStr = new Date().toLocaleTimeString();
+      document.getElementById('sync-last-time').textContent = 'Last synced: ' + timeStr;
+      lastFetchedCloudJson = JSON.stringify(dataToPush);
+    } else {
+      updateSyncBadge('error');
+      console.error('Failed to push data to cloud:', res.statusText);
+    }
+  } catch (e) {
+    updateSyncBadge('error');
+    console.error('Error pushing data to cloud:', e);
+  }
+}
+
+async function applyCloudData(cloudData) {
+  if (!cloudData) return;
+  try {
+    if (cloudData.sentory1_expenses) {
+      localStorage.setItem('sentory1_expenses', JSON.stringify(cloudData.sentory1_expenses));
+    } else {
+      localStorage.removeItem('sentory1_expenses');
+    }
+    if (cloudData.sentory1_earnings) {
+      localStorage.setItem('sentory1_earnings', JSON.stringify(cloudData.sentory1_earnings));
+    } else {
+      localStorage.removeItem('sentory1_earnings');
+    }
+    if (cloudData.sentory1_leads) {
+      localStorage.setItem('sentory1_leads', JSON.stringify(cloudData.sentory1_leads));
+    } else {
+      localStorage.removeItem('sentory1_leads');
+    }
+    if (cloudData.sentory1_users) {
+      localStorage.setItem('sentory1_users', JSON.stringify(cloudData.sentory1_users));
+      USERS = cloudData.sentory1_users;
+    }
+    const timeStr = new Date().toLocaleTimeString();
+    document.getElementById('sync-last-time').textContent = 'Last synced: ' + timeStr;
+  } catch (e) {
+    console.error('Error applying cloud data:', e);
+  }
+}
+
+function refreshActiveView() {
+  const page = currentPage;
+  if (page === 'dashboard') renderDashboard();
+  else if (page === 'user-management') renderUsers();
+  else if (page === 'expense-list') renderExpenseList();
+  else if (page === 'reports') buildReport();
+  else if (page === 'my-expenses') renderMyExpenses();
+  else if (page === 'lead-management') renderLeadList();
+  else if (page === 'earning-management') renderEarningList();
+}
+
+async function saveAndConnectSync() {
+  const dbUrl = document.getElementById('sync-db-url').value.trim();
+  const secret = document.getElementById('sync-db-secret').value.trim();
+  const enabled = document.getElementById('sync-enabled').checked;
+
+  if (enabled && !dbUrl) {
+    showToast('Please enter a valid Firebase Database URL.', 'error');
+    return;
+  }
+
+  syncConfig = { enabled, dbUrl, secret };
+  localStorage.setItem('sentory1_sync_config', JSON.stringify(syncConfig));
+  updateSyncBadge('syncing');
+
+  if (!enabled) {
+    updateSyncBadge();
+    showToast('Cloud Sync disabled.', 'info');
+    return;
+  }
+
+  const ok = await testFirebaseConnection();
+  if (!ok) {
+    updateSyncBadge('error');
+    showToast('Failed to connect to Firebase. Check URL, secrets & rules.', 'error');
+    return;
+  }
+
+  updateSyncBadge('connected');
+  showToast('Successfully connected to Firebase!', 'success');
+
+  const cloudData = await fetchCloudData();
+  const hasCloudData = cloudData && (
+    (cloudData.sentory1_expenses && cloudData.sentory1_expenses.length) ||
+    (cloudData.sentory1_earnings && cloudData.sentory1_earnings.length) ||
+    (cloudData.sentory1_leads && cloudData.sentory1_leads.length)
+  );
+
+  const hasLocalData = getExpenses().length > 0 || getLeads().length > 0 || getEarnings().length > 0;
+
+  if (hasLocalData && hasCloudData) {
+    const choice = confirm("Conflict Detected!\n\nBoth this browser and the Cloud database contain records.\n\nClick 'OK' to DOWNLOAD cloud data and overwrite local records (recommended if this is a new browser).\n\nClick 'Cancel' to UPLOAD local records and overwrite the cloud database.");
+    if (choice) {
+      await applyCloudData(cloudData);
+      showToast('Cloud data downloaded and applied locally.', 'success');
+    } else {
+      await pushDataToCloud();
+      showToast('Local data uploaded and saved to Cloud.', 'success');
+    }
+  } else if (hasCloudData) {
+    await applyCloudData(cloudData);
+    showToast('Synced data downloaded from Cloud.', 'success');
+  } else {
+    await pushDataToCloud();
+    showToast('Local data pushed to Cloud.', 'success');
+  }
+  
+  setTimeout(() => location.reload(), 1000);
+}
+
+async function forcePushSync() {
+  if (!confirm("Are you sure you want to FORCE UPLOAD all local data to the Cloud? This will overwrite existing cloud records.")) return;
+  await pushDataToCloud();
+  showToast('Local data force-uploaded to Cloud.', 'success');
+  setTimeout(() => location.reload(), 1000);
+}
+
+async function forcePullSync() {
+  if (!confirm("Are you sure you want to FORCE DOWNLOAD all data from the Cloud? This will overwrite your current local records.")) return;
+  const data = await fetchCloudData();
+  if (data) {
+    await applyCloudData(data);
+    showToast('Cloud data force-downloaded and applied.', 'success');
+    setTimeout(() => location.reload(), 1000);
+  } else {
+    showToast('No database records found in the cloud to pull.', 'error');
+  }
+}
+
+async function syncPullBackground() {
+  if (!syncConfig.enabled || !syncConfig.dbUrl) return;
+  const cloudData = await fetchCloudData();
+  if (!cloudData) {
+    updateSyncBadge('error');
+    return;
+  }
+  
+  updateSyncBadge('connected');
+  const cloudJson = JSON.stringify(cloudData);
+  
+  if (cloudJson !== lastFetchedCloudJson) {
+    const localData = {
+      sentory1_expenses: getExpenses(),
+      sentory1_earnings: getEarnings(),
+      sentory1_leads: getLeads(),
+      sentory1_users: loadUsers()
+    };
+    const localJson = JSON.stringify(localData);
+    
+    if (cloudJson !== localJson) {
+      console.log('[Cloud Sync] Background update detected, applying changes...');
+      await applyCloudData(cloudData);
+      refreshActiveView();
+    }
+    lastFetchedCloudJson = cloudJson;
+  }
+}
+
+function startAutoSyncLoop() {
+  syncPullBackground();
+  setInterval(syncPullBackground, 10000);
+}
+
+// Initialize Cloud Sync Settings and Loop
+loadSyncConfig();
+startAutoSyncLoop();
 
 initAuth();
 </script>
