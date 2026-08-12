@@ -1,0 +1,4363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sentory1 – Expense Management</title>
+  <meta name="description" content="Sentory1 is a modern expense entry and management software for employees and directors, featuring dashboards, reports, and bill uploads." />
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#6366f1" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Sentory1" />
+  <link rel="apple-touch-icon" href="icon-512.png" />
+  <link rel="icon" type="image/png" href="icon-512.png" />
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ═══════════════════════════════════════════════
+       RESET & BASE
+    ═══════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg-deep:    #080c1a;
+      --bg-dark:    #0d1226;
+      --bg-card:    rgba(255,255,255,0.04);
+      --bg-card2:   rgba(255,255,255,0.07);
+      --border:     rgba(255,255,255,0.08);
+      --border2:    rgba(255,255,255,0.14);
+      --accent:     #6366f1;
+      --accent2:    #818cf8;
+      --accent3:    #a5b4fc;
+      --green:      #22d3a5;
+      --red:        #f87171;
+      --yellow:     #fbbf24;
+      --blue:       #38bdf8;
+      --purple:     #c084fc;
+      --text:       #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim:   #64748b;
+      --shadow:     0 8px 32px rgba(0,0,0,0.5);
+      --shadow-sm:  0 2px 12px rgba(0,0,0,0.3);
+      --radius:     14px;
+      --radius-sm:  8px;
+      --sidebar-w:  240px;
+      --transition: 0.22s cubic-bezier(0.4,0,0.2,1);
+    }
+    html { font-size: 14px; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-deep);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; font-family: inherit; }
+    input, select, textarea { font-family: inherit; }
+
+    /* ═══════════════════════════════════════════════
+       SCROLLBAR
+    ═══════════════════════════════════════════════ */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.4); border-radius: 3px; }
+
+    /* ═══════════════════════════════════════════════
+       UTILITY
+    ═══════════════════════════════════════════════ */
+    .hidden { display: none !important; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .gap-1 { gap: 0.5rem; }
+    .gap-2 { gap: 1rem; }
+    .gap-3 { gap: 1.5rem; }
+    .w-full { width: 100%; }
+    .text-sm { font-size: 0.85rem; }
+    .text-xs { font-size: 0.75rem; }
+    .font-600 { font-weight: 600; }
+    .font-700 { font-weight: 700; }
+    .text-muted { color: var(--text-muted); }
+    .text-green { color: var(--green); }
+    .text-red { color: var(--red); }
+    .text-yellow { color: var(--yellow); }
+    .text-accent { color: var(--accent2); }
+    .mt-1 { margin-top: 0.5rem; }
+    .mt-2 { margin-top: 1rem; }
+    .mt-3 { margin-top: 1.5rem; }
+    .mb-1 { margin-bottom: 0.5rem; }
+    .mb-2 { margin-bottom: 1rem; }
+
+    /* ═══════════════════════════════════════════════
+       GLASS CARD
+    ═══════════════════════════════════════════════ */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .card-hover { transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition); }
+    .card-hover:hover {
+      transform: translateY(-2px);
+      border-color: var(--border2);
+      box-shadow: var(--shadow);
+    }
+
+    /* ═══════════════════════════════════════════════
+       BUTTONS
+    ═══════════════════════════════════════════════ */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+      padding: 0.55rem 1.2rem;
+      border-radius: var(--radius-sm);
+      border: none;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(99,102,241,0.35);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 20px rgba(99,102,241,0.55); transform: translateY(-1px); }
+    .btn-success {
+      background: linear-gradient(135deg, #10b981, #22d3a5);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(16,185,129,0.3);
+    }
+    .btn-success:hover { box-shadow: 0 6px 20px rgba(16,185,129,0.5); transform: translateY(-1px); }
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444, #f87171);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(239,68,68,0.3);
+    }
+    .btn-danger:hover { box-shadow: 0 6px 18px rgba(239,68,68,0.5); transform: translateY(-1px); }
+    .btn-ghost {
+      background: var(--bg-card2);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.1); color: var(--text); border-color: var(--border2); }
+    .btn-sm { padding: 0.35rem 0.85rem; font-size: 0.8rem; }
+    .btn-icon { width: 34px; height: 34px; padding: 0; border-radius: var(--radius-sm); }
+
+    /* ═══════════════════════════════════════════════
+       FORM CONTROLS
+    ═══════════════════════════════════════════════ */
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .form-control {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      padding: 0.65rem 0.9rem;
+      font-size: 0.9rem;
+      transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+      width: 100%;
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.18);
+      background: rgba(255,255,255,0.07);
+    }
+    .form-control::placeholder { color: var(--text-dim); }
+    select.form-control option { background: #1e2340; color: var(--text); }
+    textarea.form-control { resize: vertical; min-height: 80px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+    .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.1rem; }
+    .col-span-2 { grid-column: span 2; }
+
+    /* ═══════════════════════════════════════════════
+       LOGIN PAGE
+    ═══════════════════════════════════════════════ */
+    #page-login {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(99,102,241,0.3) 0%, transparent 60%),
+                  radial-gradient(ellipse 60% 40% at 80% 90%, rgba(139,92,246,0.2) 0%, transparent 50%),
+                  var(--bg-deep);
+      position: relative;
+      overflow: hidden;
+    }
+    #page-login::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236366f1' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    .login-box {
+      width: 100%;
+      max-width: 420px;
+      padding: 2.5rem;
+      background: rgba(13,18,38,0.85);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      backdrop-filter: blur(24px);
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.1);
+      position: relative;
+      z-index: 1;
+      animation: loginSlideIn 0.6s cubic-bezier(0.22,1,0.36,1);
+    }
+    @keyframes loginSlideIn {
+      from { opacity: 0; transform: translateY(30px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .login-logo {
+      display: flex; align-items: center; gap: 0.8rem;
+      margin-bottom: 2rem;
+    }
+    .login-logo-icon {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      box-shadow: 0 6px 20px rgba(99,102,241,0.4);
+    }
+    .login-logo-text h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; }
+    .login-logo-text span { font-size: 0.75rem; color: var(--text-muted); }
+    .login-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.3rem; }
+    .login-sub { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.8rem; }
+    .login-input-wrap { position: relative; }
+    .login-input-wrap svg {
+      position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%);
+      color: var(--text-dim); pointer-events: none;
+    }
+    .login-input-wrap .form-control { padding-left: 2.6rem; }
+    #login-error {
+      background: rgba(248,113,113,0.1);
+      border: 1px solid rgba(248,113,113,0.3);
+      color: var(--red);
+      padding: 0.65rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+    .login-hints {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: rgba(99,102,241,0.06);
+      border: 1px solid rgba(99,102,241,0.15);
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* ═══════════════════════════════════════════════
+       APP LAYOUT (sidebar + content)
+    ═══════════════════════════════════════════════ */
+    #app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* SIDEBAR */
+    #sidebar {
+      width: var(--sidebar-w);
+      background: linear-gradient(180deg, #0d1226 0%, #080c1a 100%);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      transition: transform var(--transition);
+    }
+    .sidebar-header {
+      padding: 1.4rem 1.2rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 0.7rem;
+    }
+    .sidebar-logo-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .sidebar-logo-text { font-size: 1rem; font-weight: 800; letter-spacing: -0.01em; }
+    .sidebar-logo-sub { font-size: 0.65rem; color: var(--text-dim); }
+
+    .sidebar-user {
+      margin: 0.8rem 1rem;
+      padding: 0.8rem;
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; gap: 0.7rem;
+    }
+    .user-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #c084fc);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.85rem;
+      flex-shrink: 0;
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    .user-avatar:hover .avatar-overlay { opacity: 1; }
+    .avatar-img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+    .avatar-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .avatar-overlay svg { color: #fff; }
+    .avatar-label {
+      display: contents;
+      cursor: pointer;
+    }
+    .avatar-remove-btn {
+      position: absolute;
+      top: -3px; right: -3px;
+      width: 14px; height: 14px;
+      background: var(--red);
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 9px;
+      line-height: 14px;
+      text-align: center;
+      cursor: pointer;
+      display: none;
+      z-index: 2;
+      padding: 0;
+    }
+    .user-avatar.has-photo .avatar-remove-btn { display: block; }
+    .user-name { font-size: 0.85rem; font-weight: 600; }
+    .user-role {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 0.15rem 0.5rem;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .role-admin { background: rgba(99,102,241,0.2); color: var(--accent2); border: 1px solid rgba(99,102,241,0.3); }
+    .role-employee { background: rgba(34,211,165,0.1); color: var(--green); border: 1px solid rgba(34,211,165,0.2); }
+
+    .sidebar-nav { flex: 1; padding: 0.8rem 0.8rem; overflow-y: auto; }
+    .nav-section-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.6rem 0.6rem 0.3rem;
+      margin-top: 0.4rem;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.65rem 0.9rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all var(--transition);
+      border: 1px solid transparent;
+      margin-bottom: 0.15rem;
+      user-select: none;
+    }
+    .nav-item:hover { background: var(--bg-card2); color: var(--text); border-color: var(--border); }
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(99,102,241,0.18), rgba(139,92,246,0.12));
+      color: var(--accent3);
+      border-color: rgba(99,102,241,0.25);
+      font-weight: 600;
+    }
+    .nav-item svg { flex-shrink: 0; opacity: 0.8; }
+    .nav-item.active svg { opacity: 1; }
+    .nav-badge {
+      margin-left: auto;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.1rem 0.45rem;
+      border-radius: 20px;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .sidebar-footer {
+      padding: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .btn-logout {
+      width: 100%;
+      background: rgba(248,113,113,0.08);
+      border: 1px solid rgba(248,113,113,0.2);
+      color: var(--red);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      transition: all var(--transition);
+    }
+    .btn-logout:hover { background: rgba(248,113,113,0.18); border-color: rgba(248,113,113,0.4); }
+
+    /* MAIN CONTENT */
+    #main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .topbar {
+      height: 64px;
+      background: rgba(13,18,38,0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.8rem;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-title { font-size: 1.15rem; font-weight: 700; }
+    .topbar-subtitle { font-size: 0.78rem; color: var(--text-muted); }
+    .topbar-right { display: flex; align-items: center; gap: 1rem; }
+    .topbar-date {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: var(--bg-card2);
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.8rem;
+      border-radius: var(--radius-sm);
+    }
+
+    .page-content {
+      padding: 1.8rem;
+      flex: 1;
+      animation: pageFadeIn 0.3s ease;
+    }
+    @keyframes pageFadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ═══════════════════════════════════════════════
+       DASHBOARD
+    ═══════════════════════════════════════════════ */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.2rem;
+      margin-bottom: 1.8rem;
+    }
+    .stat-card {
+      padding: 1.4rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      position: relative;
+      overflow: hidden;
+      transition: all var(--transition);
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+    .stat-card.s-purple::before { background: linear-gradient(90deg, #6366f1, #8b5cf6); }
+    .stat-card.s-green::before  { background: linear-gradient(90deg, #10b981, #22d3a5); }
+    .stat-card.s-yellow::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .stat-card.s-blue::before   { background: linear-gradient(90deg, #0ea5e9, #38bdf8); }
+    .stat-card:hover { transform: translateY(-3px); border-color: var(--border2); box-shadow: var(--shadow); }
+    .stat-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .stat-icon.s-purple { background: rgba(99,102,241,0.15); color: var(--accent2); }
+    .stat-icon.s-green  { background: rgba(34,211,165,0.12); color: var(--green); }
+    .stat-icon.s-yellow { background: rgba(251,191,36,0.12); color: var(--yellow); }
+    .stat-icon.s-blue   { background: rgba(56,189,248,0.12); color: var(--blue); }
+    .stat-label { font-size: 0.78rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.3rem; }
+    .stat-value { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em; }
+    .stat-trend { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem; }
+
+    .dashboard-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; margin-bottom: 1.4rem; }
+    .chart-card { padding: 1.4rem; }
+    .chart-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 1.2rem; }
+
+    /* Simple bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 0.5rem; height: 140px; padding-top: 0.5rem; }
+    .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+    .bar {
+      width: 100%;
+      border-radius: 4px 4px 0 0;
+      min-height: 4px;
+      transition: height 0.8s cubic-bezier(0.4,0,0.2,1);
+      position: relative;
+      cursor: pointer;
+    }
+    .bar.purple { background: linear-gradient(180deg, #818cf8, #6366f1); }
+    .bar.green  { background: linear-gradient(180deg, #34d399, #10b981); }
+    .bar-label { font-size: 0.65rem; color: var(--text-dim); white-space: nowrap; }
+    .bar-val { font-size: 0.65rem; color: var(--text-muted); }
+
+    /* Donut chart substitute */
+    .donut-wrap { display: flex; align-items: center; gap: 1.4rem; }
+    .donut-legend { display: flex; flex-direction: column; gap: 0.6rem; flex: 1; }
+    .donut-item { display: flex; align-items: center; gap: 0.6rem; font-size: 0.8rem; }
+    .donut-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    .donut-item-label { color: var(--text-muted); flex: 1; }
+    .donut-item-val { font-weight: 700; color: var(--text); }
+    .donut-svg { flex-shrink: 0; }
+
+    /* Recent expenses */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .section-header h3 { font-size: 1rem; font-weight: 700; }
+
+    /* ═══════════════════════════════════════════════
+       TABLE
+    ═══════════════════════════════════════════════ */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    thead th {
+      background: rgba(255,255,255,0.04);
+      padding: 0.6rem 0.75rem;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background var(--transition);
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.03); }
+    tbody td {
+      padding: 0.6rem 0.75rem;
+      font-size: 0.82rem;
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 0.25rem 0.65rem;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge-upi    { background: rgba(99,102,241,0.15); color: var(--accent2); border: 1px solid rgba(99,102,241,0.25); }
+    .badge-cash   { background: rgba(34,211,165,0.1);  color: var(--green);   border: 1px solid rgba(34,211,165,0.2); }
+    .badge-bank   { background: rgba(56,189,248,0.1);  color: var(--blue);    border: 1px solid rgba(56,189,248,0.2); }
+    .badge-card   { background: rgba(251,191,36,0.1);  color: var(--yellow);  border: 1px solid rgba(251,191,36,0.2); }
+    .badge-cheque { background: rgba(248,113,113,0.1);  color: var(--red);     border: 1px solid rgba(248,113,113,0.2); }
+    .badge-head   { background: rgba(192,132,252,0.1); color: var(--purple);  border: 1px solid rgba(192,132,252,0.2); }
+
+    .action-btns { display: flex; gap: 0.4rem; align-items: center; }
+
+    /* ═══════════════════════════════════════════════
+       FILTER BAR
+    ═══════════════════════════════════════════════ */
+    .filter-bar {
+      display: flex; align-items: flex-end; flex-wrap: wrap; gap: 0.9rem;
+      padding: 1.2rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 1.2rem;
+    }
+    .filter-bar .form-group { min-width: 140px; flex: 1; }
+
+    /* ═══════════════════════════════════════════════
+       EXPENSE FORM
+    ═══════════════════════════════════════════════ */
+    .form-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.8rem;
+    }
+    .form-section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1.4rem;
+      padding-bottom: 0.9rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .payment-mode-group { display: flex; gap: 0.7rem; flex-wrap: wrap; }
+    .payment-radio { display: none; }
+    .payment-label {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.55rem 1rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all var(--transition);
+      background: var(--bg-card2);
+      user-select: none;
+    }
+    .payment-label:hover { border-color: var(--accent); color: var(--text); }
+    .payment-radio:checked + .payment-label {
+      background: rgba(99,102,241,0.15);
+      border-color: var(--accent);
+      color: var(--accent3);
+      font-weight: 600;
+    }
+    .file-upload-area {
+      border: 2px dashed var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition);
+      background: rgba(255,255,255,0.02);
+    }
+    .file-upload-area:hover { border-color: var(--accent); background: rgba(99,102,241,0.05); }
+    .file-upload-area.has-file { border-color: var(--green); background: rgba(34,211,165,0.05); }
+    .file-upload-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .file-upload-text { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* ═══════════════════════════════════════════════
+       REPORTS
+    ═══════════════════════════════════════════════ */
+    .report-tabs {
+      display: flex; gap: 0.5rem;
+      margin-bottom: 1.4rem;
+    }
+    .report-tab {
+      padding: 0.6rem 1.2rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .report-tab:hover { border-color: var(--border2); color: var(--text); }
+    .report-tab.active {
+      background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.15));
+      border-color: rgba(99,102,241,0.4);
+      color: var(--accent3);
+    }
+    .report-export-btns { display: flex; gap: 0.7rem; flex-wrap: wrap; }
+
+    /* ═══════════════════════════════════════════════
+       MODAL
+    ═══════════════════════════════════════════════ */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal-box {
+      background: #0d1226;
+      border: 1px solid var(--border2);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.7);
+      animation: modalIn 0.3s cubic-bezier(0.22,1,0.36,1);
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.4rem 1.6rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-title { font-size: 1.05rem; font-weight: 700; }
+    .modal-body { padding: 1.4rem 1.6rem; }
+    .modal-footer {
+      padding: 1rem 1.6rem 1.4rem;
+      display: flex; justify-content: flex-end; gap: 0.7rem;
+      border-top: 1px solid var(--border);
+    }
+    .btn-close-modal {
+      background: none; border: none;
+      color: var(--text-muted);
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 6px;
+      transition: all var(--transition);
+      font-size: 1.2rem;
+    }
+    .btn-close-modal:hover { background: var(--bg-card2); color: var(--text); }
+
+    /* ═══════════════════════════════════════════════
+       TOAST
+    ═══════════════════════════════════════════════ */
+    #toast-container {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      z-index: 9999;
+      display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .toast {
+      display: flex; align-items: center; gap: 0.7rem;
+      padding: 0.85rem 1.1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 500;
+      min-width: 260px;
+      max-width: 360px;
+      box-shadow: var(--shadow);
+      animation: toastIn 0.3s cubic-bezier(0.22,1,0.36,1);
+      border: 1px solid;
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(30px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .toast-success { background: rgba(16,185,129,0.15); border-color: rgba(34,211,165,0.3); color: var(--green); }
+    .toast-error   { background: rgba(239,68,68,0.12);  border-color: rgba(248,113,113,0.3); color: var(--red); }
+    .toast-info    { background: rgba(99,102,241,0.12); border-color: rgba(129,140,248,0.3); color: var(--accent2); }
+
+    /* ═══════════════════════════════════════════════
+       EMPTY STATE
+    ═══════════════════════════════════════════════ */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+    }
+    .empty-state-icon { font-size: 3rem; margin-bottom: 0.8rem; opacity: 0.5; }
+    .empty-state h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.3rem; color: var(--text); }
+    .empty-state p { font-size: 0.85rem; }
+
+    /* ═══════════════════════════════════════════════
+       PAGINATION
+    ═══════════════════════════════════════════════ */
+    .pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 1rem;
+    }
+    .pagination-info { font-size: 0.8rem; color: var(--text-muted); }
+    .pagination-btns { display: flex; gap: 0.4rem; }
+    .page-btn {
+      width: 32px; height: 32px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      transition: all var(--transition);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .page-btn:hover { border-color: var(--accent); color: var(--accent2); }
+    .page-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* ═══════════════════════════════════════════════
+       BILL PREVIEW
+    ═══════════════════════════════════════════════ */
+    .bill-preview-img {
+      max-width: 100%;
+      max-height: 400px;
+      border-radius: var(--radius-sm);
+      object-fit: contain;
+      background: #111;
+    }
+    .bill-preview-pdf {
+      width: 100%;
+      height: 400px;
+      border-radius: var(--radius-sm);
+      border: none;
+    }
+
+    /* ═══════════════════════════════════════════════
+       REPORT SUMMARY TABLE
+    ═══════════════════════════════════════════════ */
+    .report-total-row td { font-weight: 700; color: var(--accent2); }
+
+    /* ═══════════════════════════════════════════════
+       MY EXPENSES MODULE
+    ═══════════════════════════════════════════════ */
+    .me-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; margin-bottom: 1.4rem; }
+    @media (max-width: 860px) { .me-grid { grid-template-columns: 1fr; } }
+    .me-card { padding: 1.4rem; }
+    .me-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 1.2rem; display:flex;align-items:center;gap:0.5rem; }
+    .progress-row {
+      display: flex; align-items: center; gap: 0.8rem;
+      margin-bottom: 0.85rem;
+    }
+    .progress-label { font-size: 0.8rem; color: var(--text-muted); min-width: 130px; white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .progress-bar-wrap { flex: 1; background: rgba(255,255,255,0.06); border-radius: 20px; height: 8px; overflow:hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 20px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+    .progress-amount { font-size: 0.8rem; font-weight: 700; color: var(--text); min-width: 70px; text-align:right; }
+    .progress-pct { font-size: 0.72rem; color: var(--text-dim); min-width: 36px; text-align:right; }
+    .mode-card {
+      display: flex; align-items: center; gap: 0.9rem;
+      padding: 0.9rem 1rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.6rem;
+      transition: all var(--transition);
+    }
+    .mode-card:hover { background: rgba(255,255,255,0.06); border-color: var(--border2); }
+    .mode-card-icon { font-size: 1.4rem; flex-shrink:0; }
+    .mode-card-label { font-size: 0.85rem; font-weight: 600; flex: 1; }
+    .mode-card-amt { font-size: 0.95rem; font-weight: 800; }
+    .mode-card-count { font-size: 0.72rem; color: var(--text-dim); }
+    .month-progress-wrap { margin-bottom: 1rem; }
+    .month-label-row { display:flex;justify-content:space-between;margin-bottom:0.3rem; }
+    .month-name { font-size:0.8rem;font-weight:600;color:var(--text-muted); }
+    .month-amt  { font-size:0.8rem;font-weight:700;color:var(--text); }
+    .grand-total-banner {
+      background: linear-gradient(135deg, rgba(99,102,241,0.18), rgba(139,92,246,0.12));
+      border: 1px solid rgba(99,102,241,0.3);
+      border-radius: var(--radius);
+      padding: 1.4rem 1.8rem;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap:wrap; gap:1rem;
+      margin-bottom: 1.6rem;
+    }
+    .grand-total-left h2 { font-size: 0.78rem; font-weight: 600; color: var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.3rem; }
+    .grand-total-amount { font-size: 2.4rem; font-weight: 800; letter-spacing:-0.03em; background: linear-gradient(135deg,#a5b4fc,#c084fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .grand-total-right { display:flex;gap:1.2rem;flex-wrap:wrap; }
+    .grand-sub-stat { text-align:center; }
+    .grand-sub-stat .val { font-size:1.2rem;font-weight:700;color:var(--text); }
+    .grand-sub-stat .lbl { font-size:0.72rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.05em; }
+
+    /* Laptop / medium screens */
+    @media (max-width: 1280px) {
+      :root { --sidebar-w: 200px; }
+      #sidebar { width: 200px; }
+      #main { padding: 0; }
+      .page-content { padding: 1rem; }
+      thead th { padding: 0.5rem 0.65rem; font-size: 0.68rem; }
+      tbody td  { padding: 0.5rem 0.65rem; font-size: 0.78rem; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      .filter-bar { gap: 0.6rem; padding: 0.9rem; }
+      .filter-bar .form-group { min-width: 110px; }
+    }
+    @media (max-width: 1024px) {
+      :root { --sidebar-w: 180px; }
+      #sidebar { width: 180px; }
+      .sidebar-logo-text { font-size: 0.9rem; }
+      .nav-item { padding: 0.55rem 0.9rem; font-size: 0.8rem; }
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      :root { --sidebar-w: 0px; }
+      #sidebar { transform: translateX(-240px); width: 240px; }
+      #sidebar.open { transform: translateX(0); }
+      #main { margin-left: 0; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-grid-3 { grid-template-columns: 1fr 1fr; }
+      .col-span-2 { grid-column: span 1; }
+      .dashboard-row { grid-template-columns: 1fr; }
+      .stat-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 480px) {
+      .stat-grid { grid-template-columns: 1fr; }
+      .form-grid-3 { grid-template-columns: 1fr; }
+    }
+
+    /* print */
+    @media print {
+      #sidebar, .topbar, .filter-bar, .action-btns, .pagination, .section-header .btn { display: none !important; }
+      #main { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════
+     LOGIN PAGE
+════════════════════════════════════════════════════ -->
+<div id="page-login">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon">💰</div>
+      <div class="login-logo-text">
+        <h1>Sentory1</h1>
+        <span>Expense Management System</span>
+      </div>
+    </div>
+    <p class="login-title">Welcome back</p>
+    <p class="login-sub">Sign in to manage your expenses</p>
+
+    <div id="login-error" class="hidden"></div>
+
+    <div style="display:flex;flex-direction:column;gap:1rem;">
+      <div class="form-group">
+        <label class="form-label" for="login-username">Username</label>
+        <div class="login-input-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+          <input id="login-username" class="form-control" type="text" placeholder="Enter username" autocomplete="username" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="login-password">Password</label>
+        <div class="login-input-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input id="login-password" class="form-control" type="password" placeholder="Enter password" autocomplete="current-password" />
+        </div>
+      </div>
+      <button id="login-btn" class="btn btn-primary w-full" style="padding:0.75rem;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Sign In
+      </button>
+    </div>
+
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     APP
+════════════════════════════════════════════════════ -->
+<div id="app" class="hidden">
+
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo-icon">💰</div>
+      <div>
+        <div class="sidebar-logo-text">Sentory1</div>
+        <div class="sidebar-logo-sub">Expense Manager</div>
+      </div>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sb-avatar" onclick="document.getElementById('avatar-file-input').click()" title="Click to upload photo">
+        <span id="sb-avatar-initials"></span>
+        <img id="sb-avatar-img" class="avatar-img" style="display:none;" alt="Profile" />
+        <div class="avatar-overlay">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </div>
+        <button class="avatar-remove-btn" id="avatar-remove-btn" onclick="removeProfilePhoto(event)" title="Remove photo">✕</button>
+      </div>
+      <input type="file" id="avatar-file-input" accept="image/*" style="display:none" onchange="uploadProfilePhoto(event)" />
+      <div style="flex:1;min-width:0;">
+        <div class="user-name" id="sb-name"></div>
+        <span class="user-role" id="sb-role"></span>
+      </div>
+    </div>
+
+    <div class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <div class="nav-item active" data-page="dashboard" id="nav-dashboard">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" data-page="earning-management" id="nav-earning-management">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Earning
+      </div>
+      <div class="nav-item" data-page="add-expense" id="nav-add-expense">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Add Expense
+      </div>
+      <div class="nav-item" data-page="expense-list" id="nav-expense-list">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Expense List
+      </div>
+      <div class="nav-section-label">Business</div>
+      <div class="nav-item" data-page="lead-management" id="nav-lead-management">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Lead Management
+      </div>
+      <div class="nav-section-label">Analytics</div>
+      <div class="nav-item" data-page="my-expenses" id="nav-my-expenses">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        My Expenses
+      </div>
+      <div class="nav-item" data-page="reports" id="nav-reports">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Reports
+      </div>
+      <div class="nav-section-label admin-only-nav">Administration</div>
+      <div class="nav-item admin-only-nav" data-page="user-management" id="nav-user-management">
+        👥 User Management
+      </div>
+      <div class="nav-item admin-only-nav" data-page="backup-restore" id="nav-backup-restore">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Backup &amp; Restore
+      </div>
+      <div class="nav-item admin-only-nav" data-page="clear-data" id="nav-clear-data" style="color:var(--red);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        Clear All Data
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="btn btn-ghost w-full" id="change-password-btn" style="margin-bottom:0.5rem;">
+        🔑 Change Password
+      </button>
+      <button class="btn-logout" id="logout-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Logout
+      </button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div id="main">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div>
+        <div class="topbar-title" id="topbar-title">Dashboard</div>
+        <div class="topbar-subtitle" id="topbar-subtitle">Overview of your expenses</div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-date" id="topbar-date"></div>
+      </div>
+    </header>
+
+
+    <!-- ── USER MANAGEMENT PAGE ── -->
+    <div id="page-user-management" class="page-content hidden">
+      <div class="section-header" style="margin-bottom:1rem;">
+        <div>
+          <h2 style="font-size:1.2rem;">👥 User Management</h2>
+          <p class="text-muted text-sm" style="margin-top:.25rem;">Create, edit and remove employee/director accounts.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openUserModal()">+ Add User</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap" style="border:none;">
+          <table>
+            <thead><tr><th>Name</th><th>Login ID</th><th>Role</th><th>Actions</th></tr></thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DASHBOARD PAGE ── -->
+    <div id="page-dashboard" class="page-content">
+
+      <!-- Earning Summary Cards -->
+      <div class="stat-grid" id="db-earning-stat-grid" style="margin-bottom:1.4rem;">
+        <div class="stat-card s-purple card-hover">
+          <div class="stat-icon s-purple">💵</div>
+          <div class="stat-label">Total Earning Fund</div>
+          <div class="stat-value" id="db-stat-earning-fund">₹0</div>
+          <div class="stat-trend" id="db-stat-earning-fund-count">0 records</div>
+        </div>
+        <div class="stat-card s-yellow card-hover">
+          <div class="stat-icon s-yellow">🏢</div>
+          <div class="stat-label">Hold in Sentory1 Bank</div>
+          <div class="stat-value" id="db-stat-earning-hold">₹0</div>
+          <div class="stat-trend">withheld amount</div>
+        </div>
+
+        <div class="stat-card s-blue card-hover">
+          <div class="stat-icon s-blue">🤝</div>
+          <div class="stat-label">My Earning Share Fund</div>
+          <div class="stat-value" id="db-stat-earning-share">₹0</div>
+          <div class="stat-trend" id="db-stat-earning-share-label">my total share</div>
+        </div>
+      </div>
+
+      <!-- 3 Summary Cards -->
+      <div class="stat-grid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:1.4rem;">
+        <div class="stat-card s-purple card-hover">
+          <div class="stat-icon s-purple">🏢</div>
+          <div class="stat-label">Total Sentory1 Expense</div>
+          <div class="stat-value" id="stat-sentory-total">₹0</div>
+          <div class="stat-trend" id="stat-sentory-count"></div>
+        </div>
+        <div class="stat-card s-green card-hover">
+          <div class="stat-icon s-green">💰</div>
+          <div class="stat-label">My Expense</div>
+          <div class="stat-value" id="stat-my-total">₹0</div>
+          <div class="stat-trend" id="stat-my-count"></div>
+        </div>
+        <div class="stat-card s-blue card-hover">
+          <div class="stat-icon s-blue">📈</div>
+          <div class="stat-label">Profit</div>
+          <div class="stat-value" id="db-stat-profit">₹0</div>
+          <div class="stat-trend">share fund - my expense</div>
+        </div>
+      </div>
+
+      <!-- Recent -->
+      <div class="card">
+        <div style="padding:1.2rem 1.4rem;" class="section-header">
+          <h3>🕐 Recent Expenses</h3>
+          <button class="btn btn-ghost btn-sm" onclick="navigateTo('expense-list')">View All</button>
+        </div>
+        <div class="table-wrap" style="border:none;border-radius:0;">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th><th>Expense Month</th><th>Expense Head</th><th>Amount</th>
+                <th>Payment</th><th>Transfer To</th>
+                <th>Added By</th>
+              </tr>
+            </thead>
+            <tbody id="recent-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ADD/EDIT EXPENSE PAGE ── -->
+    <div id="page-add-expense" class="page-content hidden">
+      <div class="form-section">
+        <div class="form-section-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          <span id="expense-form-title">New Expense Entry</span>
+        </div>
+
+        <div class="form-grid">
+
+          <!-- 1. Expense Month -->
+          <div class="form-group">
+            <label class="form-label" for="f-exp-month">Expense Month *</label>
+            <input id="f-exp-month" class="form-control" type="month" required />
+          </div>
+
+          <!-- 2. Expense Head -->
+          <div class="form-group">
+            <label class="form-label" for="f-head">Expense Head *</label>
+            <select id="f-head" class="form-control" required>
+              <option value="">-- Select Category --</option>
+              <option>Developing Charge</option>
+              <option>Server Charge</option>
+            </select>
+          </div>
+
+          <!-- 3. Total Sentory1 Expense -->
+          <div class="form-group">
+            <label class="form-label" for="f-sentory-total">Total Sentory1 Expense</label>
+            <div style="position:relative;">
+              <input id="f-sentory-total" class="form-control" type="number" min="0" step="0.01"
+                style="background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.3);color:var(--accent2);font-weight:700;" placeholder="All users total"
+                oninput="calcMyExpense()" />
+            </div>
+          </div>
+
+          <!-- 4. My Expense (15% of Sentory1 total, auto-calculated) -->
+          <div class="form-group">
+            <label class="form-label" for="f-amount">My Expense (₹) *
+              <span style="font-size:0.72rem;color:var(--accent3);font-weight:400;margin-left:0.4rem;">auto 15% of Sentory1</span>
+            </label>
+            <input id="f-amount" class="form-control" type="number" min="0" step="0.01" placeholder="0.00" required oninput="updateTotalExpenseDisplay()" />
+          </div>
+
+          <!-- 5. Paid Date -->
+          <div class="form-group">
+            <label class="form-label" for="f-paid-date">Paid Date</label>
+            <input id="f-paid-date" class="form-control" type="date" />
+          </div>
+
+          <!-- 5. Payment Mode -->
+          <div class="form-group">
+            <label class="form-label" for="f-vendor">Transfer To</label>
+            <input id="f-vendor" class="form-control" type="text" placeholder="Transfer to person / account" />
+          </div>
+          <div class="form-group col-span-2">
+            <label class="form-label">Payment Mode *</label>
+            <div class="payment-mode-group">
+              <input type="radio" class="payment-radio" name="f-mode" id="pm-cash" value="Cash" />
+              <label class="payment-label" for="pm-cash">💵 Cash</label>
+              <input type="radio" class="payment-radio" name="f-mode" id="pm-bank" value="Bank" />
+              <label class="payment-label" for="pm-bank">🏦 Bank</label>
+              <input type="radio" class="payment-radio" name="f-mode" id="pm-upi" value="UPI" />
+              <label class="payment-label" for="pm-upi">📱 UPI</label>
+              <input type="radio" class="payment-radio" name="f-mode" id="pm-card" value="Card" />
+              <label class="payment-label" for="pm-card">💳 Card</label>
+              <input type="radio" class="payment-radio" name="f-mode" id="pm-cheque" value="Cheque" />
+              <label class="payment-label" for="pm-cheque">🧾 Cheque</label>
+            </div>
+          </div>
+          <div class="form-group col-span-2">
+            <label class="form-label" for="f-remarks">Remarks</label>
+            <textarea id="f-remarks" class="form-control" placeholder="Additional notes or description…"></textarea>
+          </div>
+          <div class="form-group col-span-2">
+            <label class="form-label">Bill Upload (Image / PDF)</label>
+            <div class="file-upload-area" id="file-upload-area" onclick="document.getElementById('f-bill').click()">
+              <div class="file-upload-icon">📎</div>
+              <div class="file-upload-text" id="file-upload-text">Click to upload bill (JPG, PNG, PDF)</div>
+              <input id="f-bill" type="file" accept="image/*,.pdf" style="display:none" onchange="handleFileSelect(event)" />
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:0.8rem;margin-top:1.4rem;justify-content:flex-end;flex-wrap:wrap;">
+          <button class="btn btn-ghost" id="form-cancel-btn" onclick="navigateTo('expense-list')">Cancel</button>
+          <button class="btn btn-success" id="expense-save-btn" onclick="saveExpense()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save Expense
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── EXPENSE LIST PAGE ── -->
+    <div id="page-expense-list" class="page-content hidden">
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="form-group">
+          <label class="form-label">From Date</label>
+          <input id="fl-from" class="form-control" type="date" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">To Date</label>
+          <input id="fl-to" class="form-control" type="date" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Expense Head</label>
+          <select id="fl-head" class="form-control">
+            <option value="">All Categories</option>
+            <option>Developing Charge</option>
+            <option>Server Charge</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Mode</label>
+          <select id="fl-mode" class="form-control">
+            <option value="">All Modes</option>
+            <option>Cash</option><option>Bank</option><option>UPI</option><option>Card</option><option>Cheque</option>
+          </select>
+        </div>
+        <div class="form-group" style="min-width:180px;">
+          <label class="form-label">Search Transfer To</label>
+          <input id="fl-vendor" class="form-control" type="text" placeholder="Transfer to…" />
+        </div>
+        <div style="display:flex;gap:0.6rem;align-items:flex-end;padding-bottom:0.05rem;">
+          <button class="btn btn-primary" onclick="applyFilters()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Search
+          </button>
+          <button class="btn btn-ghost" onclick="clearFilters()">Clear</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="padding:1.1rem 1.4rem;" class="section-header">
+          <h3>💼 Expense Records</h3>
+          <div style="display:flex;gap:0.6rem;">
+            <button class="btn btn-primary btn-sm" onclick="navigateTo('add-expense')">+ Add New</button>
+          </div>
+        </div>
+        <div class="table-wrap" style="border:none;border-radius:0;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>Date</th><th>Expense Month</th><th>Expense Head</th><th>My Amount</th><th>Sentory1 Total</th>
+                <th>Payment</th><th>Transfer To</th><th>Remarks</th><th>Bill</th>
+                <th id="col-added-by">Added By</th><th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="expense-tbody"></tbody>
+          </table>
+        </div>
+        <!-- Total Expense Row -->
+        <div id="expense-total-bar" style="display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1.4rem;background:linear-gradient(135deg,rgba(99,102,241,0.12),rgba(139,92,246,0.08));border-top:1px solid rgba(99,102,241,0.25);">
+          <span style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Total Sentory1 Expense (filtered)</span>
+          <span id="expense-total-amt" style="font-size:1.1rem;font-weight:800;color:var(--accent2);">₹0</span>
+        </div>
+        <div style="padding:1rem 1.4rem;">
+          <div class="pagination">
+            <div class="pagination-info" id="pagination-info"></div>
+            <div class="pagination-btns" id="pagination-btns"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── REPORTS PAGE ── -->
+    <div id="page-reports" class="page-content hidden">
+      <div class="report-tabs">
+        <button class="report-tab active" onclick="setReportTab('custom',this)">📆 Expense Report</button>
+        <button class="report-tab" onclick="setReportTab('leads',this)">🧲 Lead Report</button>
+      </div>
+
+      <!-- Custom Range filter -->
+      <div id="rpt-custom-filter" class="filter-bar" style="margin-bottom:1.2rem;">
+        <div class="form-group">
+          <label class="form-label">From Date</label>
+          <input id="rpt-from" class="form-control" type="date" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">To Date</label>
+          <input id="rpt-to" class="form-control" type="date" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Expense Head</label>
+          <input id="rpt-head-filter" class="form-control" type="text" placeholder="All categories" />
+        </div>
+        <div style="display:flex;gap:0.6rem;align-items:flex-end;">
+          <button class="btn btn-primary" onclick="buildReport()">Generate</button>
+          <button class="btn btn-ghost btn-sm" onclick="clearReportFilter()" style="height:40px;">Clear</button>
+        </div>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="stat-grid" id="rpt-summary-cards" style="margin-bottom:1.4rem;"></div>
+
+      <!-- Export -->
+      <div class="section-header" style="margin-bottom:1rem;">
+        <h3>📋 Report Table</h3>
+        <div class="report-export-btns" id="admin-export-btns">
+          <button class="btn btn-success btn-sm" onclick="exportCSV()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export Excel (CSV)
+          </button>
+          <button class="btn btn-ghost btn-sm" onclick="exportPDF()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Export PDF
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap" style="border:none;border-radius:0;">
+          <table>
+            <thead>
+              <tr id="rpt-thead-row"></tr>
+            </thead>
+            <tbody id="rpt-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Lead Report filter -->
+      <div id="rpt-lead-filter" class="filter-bar hidden" style="margin-bottom:1.2rem;">
+        <div class="form-group">
+          <label class="form-label">From Date</label>
+          <input id="rpt-lead-from" class="form-control" type="date" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">To Date</label>
+          <input id="rpt-lead-to" class="form-control" type="date" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Lead Stage</label>
+          <select id="rpt-lead-stage" class="form-control">
+            <option value="">All Stages</option>
+            <option>New</option>
+            <option>Follow-up</option>
+            <option>Proposal</option>
+            <option>Negotiation</option>
+            <option>Won</option>
+            <option>Lost</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Meeting</label>
+          <select id="rpt-lead-meeting" class="form-control">
+            <option value="">All</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:0.6rem;align-items:flex-end;">
+          <button class="btn btn-primary" onclick="buildLeadReport()">Generate</button>
+        </div>
+      </div>
+
+      <!-- Lead Summary Cards -->
+      <div class="stat-grid" id="rpt-lead-summary" style="margin-bottom:1.4rem;display:none;"></div>
+
+      <!-- Lead Export Buttons + Table Header -->
+      <div class="section-header" id="rpt-lead-export-row" style="margin-bottom:1rem;display:none;">
+        <h3>🧲 Lead Report Table</h3>
+        <div class="report-export-btns">
+          <button class="btn btn-success btn-sm" onclick="exportLeadCSV()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+          <button class="btn btn-ghost btn-sm" onclick="exportLeadPDF()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Export PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- Lead Report Table -->
+      <div class="card" id="rpt-lead-table-card" style="display:none;">
+        <div class="table-wrap" style="border:none;border-radius:0;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>Lead Date</th><th>Company</th><th>Contact Person</th>
+                <th>Contact No.</th><th>Post</th><th>City</th>
+                <th>Meeting</th><th>Last Meeting</th><th>Proposal</th><th>Stage</th>
+              </tr>
+            </thead>
+            <tbody id="rpt-lead-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── MY EXPENSES PAGE ── -->
+    <div id="page-my-expenses" class="page-content hidden">
+
+      <!-- Grand Total Banner -->
+      <div class="grand-total-banner">
+        <div class="grand-total-left">
+          <h2 id="me-banner-label">My Total Expenses (All Time)</h2>
+          <div class="grand-total-amount" id="me-grand-total">₹0</div>
+        </div>
+        <div class="grand-total-right">
+          <div class="grand-sub-stat">
+            <div class="val" id="me-total-count">0</div>
+            <div class="lbl">Entries</div>
+          </div>
+          <div class="grand-sub-stat">
+            <div class="val" id="me-avg-per-entry">₹0</div>
+            <div class="lbl">Avg / Entry</div>
+          </div>
+          <div class="grand-sub-stat">
+            <div class="val" id="me-this-month">₹0</div>
+            <div class="lbl">This Month</div>
+          </div>
+          <div class="grand-sub-stat">
+            <div class="val" id="me-today">₹0</div>
+            <div class="lbl">Today</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category + Mode row -->
+      <div class="me-grid">
+        <!-- Category Breakdown -->
+        <div class="card me-card">
+          <h3>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            Expense by Category
+          </h3>
+          <div id="me-cat-list"></div>
+        </div>
+
+        <!-- Payment Mode Breakdown -->
+        <div class="card me-card">
+          <h3>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Expense by Payment Mode
+          </h3>
+          <div id="me-mode-list"></div>
+        </div>
+      </div>
+
+      <!-- Month-wise History -->
+      <div class="card me-card" style="margin-bottom:1.4rem;">
+        <h3>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Month-wise Summary
+        </h3>
+        <div id="me-month-bars"></div>
+      </div>
+
+      <!-- Full Breakdown Table -->
+      <div class="card">
+        <div style="padding:1.1rem 1.4rem;" class="section-header">
+          <h3>📊 Category-wise Detail</h3>
+        </div>
+        <div class="table-wrap" style="border:none;border-radius:0;">
+          <table>
+            <thead>
+              <tr>
+                <th>Expense Head</th>
+                <th>Entries</th>
+                <th>Total Amount</th>
+                <th>% of Total</th>
+                <th>Highest Single</th>
+                <th>Avg per Entry</th>
+              </tr>
+            </thead>
+            <tbody id="me-detail-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- #page-my-expenses -->
+
+    <!-- ── LEAD MANAGEMENT PAGE ── -->
+    <div id="page-lead-management" class="page-content hidden">
+
+      <!-- Header -->
+      <div class="section-header" style="margin-bottom:1rem;">
+        <div>
+          <h2 style="font-size:1.2rem;">📊 Lead Management</h2>
+          <p class="text-muted text-sm" style="margin-top:.25rem;">Track and manage all sales leads.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openLeadModal()">+ Add Lead</button>
+      </div>
+
+      <!-- Stats row -->
+      <div class="stat-grid" id="lead-stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.4rem;"></div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar" style="margin-bottom:1rem;">
+        <div class="form-group">
+          <label class="form-label">Company Name</label>
+          <input id="lf-company" class="form-control" type="text" placeholder="Search company…" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">City</label>
+          <input id="lf-city" class="form-control" type="text" placeholder="Search city…" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Lead Stage</label>
+          <select id="lf-stage" class="form-control">
+            <option value="">All Stages</option>
+            <option>New</option>
+            <option>Follow-up</option>
+            <option>Proposal</option>
+            <option>Negotiation</option>
+            <option>Won</option>
+            <option>Lost</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Meeting</label>
+          <select id="lf-meeting" class="form-control">
+            <option value="">All</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:0.6rem;align-items:flex-end;padding-bottom:0.05rem;">
+          <button class="btn btn-primary" onclick="applyLeadFilters()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Search
+          </button>
+          <button class="btn btn-ghost" onclick="clearLeadFilters()">Clear</button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="card">
+        <div style="padding:1.1rem 1.4rem;" class="section-header">
+          <h3>🧲 Lead Records</h3>
+          <button class="btn btn-primary btn-sm" onclick="openLeadModal()">+ Add New</button>
+        </div>
+        <div class="table-wrap" style="border:none;border-radius:0;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Lead Date</th>
+                <th>Company</th>
+                <th>Contact Person</th>
+                <th>Contact No.</th>
+                <th>Post</th>
+                <th>City</th>
+                <th>Meeting</th>
+                <th>Last Meeting</th>
+                <th>Proposal</th>
+                <th>Stage</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="lead-tbody"></tbody>
+          </table>
+        </div>
+        <div style="padding:1rem 1.4rem;">
+          <div class="pagination">
+            <div class="pagination-info" id="lead-pagination-info"></div>
+            <div class="pagination-btns" id="lead-pagination-btns"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- #page-lead-management -->
+
+    <!-- ── EARNING MANAGEMENT PAGE ── -->
+    <div id="page-earning-management" class="page-content hidden" style="max-width:100%;overflow-x:hidden;">
+
+
+
+      <!-- Filter Bar -->
+      <div class="filter-bar" style="margin-bottom:1rem;">
+        <div class="form-group">
+          <label class="form-label">From Date</label>
+          <input id="ef-from" class="form-control" type="date" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">To Date</label>
+          <input id="ef-to" class="form-control" type="date" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Share Fund Status</label>
+          <select id="ef-status" class="form-control">
+            <option value="">All Statuses</option>
+            <option value="Receive">Receive</option>
+            <option value="Pending">Pending</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Received Mode</label>
+          <select id="ef-mode" class="form-control">
+            <option value="">All Modes</option>
+            <option value="Bank">Bank</option>
+            <option value="UPI">UPI</option>
+            <option value="Cash">Cash</option>
+            <option value="Cheque">Cheque</option>
+            <option value="Online">Online</option>
+            <option value="NEFT">NEFT</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:0.6rem;align-items:flex-end;padding-bottom:0.05rem;">
+          <button class="btn btn-primary" onclick="applyEarningFilters()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Search
+          </button>
+          <button class="btn btn-ghost" onclick="clearEarningFilters()">Clear</button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="card" style="max-width:100%;overflow:hidden;">
+        <div style="padding:1.1rem 1.4rem;" class="section-header">
+          <h3>💰 Earning Records</h3>
+          <div style="display:flex;gap:0.6rem;align-items:center;">
+            <button class="btn btn-ghost btn-sm" onclick="exportEarningCSV()">Export CSV</button>
+            <button class="btn btn-ghost btn-sm" onclick="exportEarningPDF()">Print Report</button>
+            <button class="btn btn-primary btn-sm" onclick="openEarningModal()">+ Add Earning</button>
+          </div>
+        </div>
+        <div class="table-wrap" style="border:none;border-radius:0;width:100%;max-width:100%;overflow-x:auto;display:block;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Earning Date</th>
+                <th>Total Earning Fund</th>
+                <th>Hold in Sentory1 Bank</th>
+                <th>Total Earning Balance</th>
+                <th>My Earning Share Fund</th>
+                <th>Share Fund Status</th>
+                <th>Received Date</th>
+                <th>Received Mode</th>
+                <th id="col-earning-added-by">Added By</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="earning-tbody"></tbody>
+          </table>
+        </div>
+        <div style="padding:1rem 1.4rem;">
+          <div class="pagination">
+            <div class="pagination-info" id="earning-pagination-info"></div>
+            <div class="pagination-btns" id="earning-pagination-btns"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- #page-earning-management -->
+
+    <!-- ── CLEAR ALL DATA PAGE ── -->
+    <div id="page-clear-data" class="page-content hidden">
+
+      <!-- Danger banner -->
+      <div style="background:linear-gradient(135deg,rgba(239,68,68,0.18),rgba(239,68,68,0.06));border:1px solid rgba(239,68,68,0.35);border-radius:var(--radius);padding:2rem 2rem 1.6rem;margin-bottom:1.6rem;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-30px;right:-20px;font-size:9rem;opacity:0.06;pointer-events:none;">🗑</div>
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
+          <div style="width:54px;height:54px;background:rgba(239,68,68,0.18);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;">⚠️</div>
+          <div>
+            <h2 style="font-size:1.3rem;font-weight:800;color:var(--red);margin-bottom:0.2rem;">Clear All Application Data</h2>
+            <p style="color:var(--text-muted);font-size:0.88rem;">This action is <strong style="color:var(--red);">permanent and irreversible</strong>. All data will be deleted immediately.</p>
+          </div>
+        </div>
+
+        <!-- What will be deleted -->
+        <div style="background:rgba(0,0,0,0.25);border-radius:var(--radius-sm);padding:1.2rem;margin-bottom:1.4rem;">
+          <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.8rem;">The following data will be permanently deleted:</div>
+          <div style="display:flex;flex-direction:column;gap:0.5rem;">
+            <div style="display:flex;align-items:center;gap:0.7rem;font-size:0.88rem;">
+              <span style="color:var(--red);font-size:1rem;">✕</span>
+              <span>All <strong>Expense Entries</strong> (all users)</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.7rem;font-size:0.88rem;">
+              <span style="color:var(--red);font-size:1rem;">✕</span>
+              <span>All <strong>Lead Management</strong> records</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.7rem;font-size:0.88rem;">
+              <span style="color:var(--red);font-size:1rem;">✕</span>
+              <span>All <strong>Profile Photos</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- What will NOT be deleted -->
+        <div style="background:rgba(34,211,165,0.06);border:1px solid rgba(34,211,165,0.15);border-radius:var(--radius-sm);padding:1rem;margin-bottom:1.4rem;">
+          <div style="font-size:0.8rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;">Will NOT be deleted:</div>
+          <div style="display:flex;align-items:center;gap:0.7rem;font-size:0.88rem;color:var(--text-muted);">
+            <span style="color:var(--green);">✓</span> User accounts &amp; passwords (login credentials are preserved)
+          </div>
+        </div>
+
+        <!-- Typed confirmation -->
+        <div style="margin-bottom:1.2rem;">
+          <label class="form-label" style="color:var(--red);margin-bottom:0.5rem;display:block;">Type <strong>DELETE</strong> to confirm</label>
+          <input id="clear-confirm-input" class="form-control" type="text" placeholder="Type DELETE here" autocomplete="off"
+            style="border-color:rgba(239,68,68,0.3);max-width:300px;"
+            oninput="document.getElementById('clear-data-btn').disabled = this.value !== 'DELETE';" />
+        </div>
+
+        <button id="clear-data-btn" class="btn btn-danger" onclick="clearAllData()" disabled
+          style="padding:0.7rem 2rem;font-size:0.95rem;opacity:1;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          Clear All Data Permanently
+        </button>
+
+      </div>
+
+      <!-- Activity summary before clearing -->
+      <div class="card" style="padding:1.4rem;">
+        <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:1rem;color:var(--text-muted);">📊 Current Data Summary</h3>
+        <div class="stat-grid" id="clear-data-summary" style="margin-bottom:0;"></div>
+      </div>
+
+    </div><!-- #page-clear-data -->
+
+    <!-- ── BACKUP & RESTORE PAGE ── -->
+    <div id="page-backup-restore" class="page-content hidden">
+      <div class="section-header" style="margin-bottom:1.5rem;">
+        <div>
+          <h2 style="font-size:1.3rem;font-weight:800;color:var(--text);">📦 Backup &amp; Restore Data</h2>
+          <p class="text-muted text-sm" style="margin-top:.25rem;">Export all application data to a single JSON backup file or restore data from a previous backup.</p>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <!-- Export Backup Card -->
+        <div class="card" style="padding:1.6rem;display:flex;flex-direction:column;justify-between;">
+          <div>
+            <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:1rem;">
+              <div style="width:44px;height:44px;background:rgba(99,102,241,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;">📥</div>
+              <div>
+                <h3 style="font-size:1.1rem;font-weight:700;">Export Backup</h3>
+                <span class="text-muted text-xs">Save all database records to JSON file</span>
+              </div>
+            </div>
+            <p style="color:var(--text-muted);font-size:0.85rem;line-height:1.5;margin-bottom:1.2rem;">
+              Downloads a full backup file containing all Expenses, Earnings, Leads, Profile Avatars, and User Accounts. Keep this file safe on your computer or cloud storage.
+            </p>
+          </div>
+          <button class="btn btn-primary w-full" onclick="exportFullBackup()" style="padding:0.75rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download Full Backup JSON
+          </button>
+        </div>
+
+        <!-- Restore Backup Card -->
+        <div class="card" style="padding:1.6rem;display:flex;flex-direction:column;justify-between;">
+          <div>
+            <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:1rem;">
+              <div style="width:44px;height:44px;background:rgba(34,211,165,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;">📤</div>
+              <div>
+                <h3 style="font-size:1.1rem;font-weight:700;">Restore Backup</h3>
+                <span class="text-muted text-xs">Load data from a backup JSON file</span>
+              </div>
+            </div>
+            <p style="color:var(--text-muted);font-size:0.85rem;line-height:1.5;margin-bottom:1.2rem;">
+              Select a previously exported Sentory1 JSON backup file to restore all your data. <strong style="color:var(--yellow);">Note:</strong> Restoring will merge/overwrite existing local records with the backup.
+            </p>
+          </div>
+          <div>
+            <input type="file" id="backup-file-input" accept=".json" style="display:none" onchange="importFullBackup(event)" />
+            <button class="btn btn-success w-full" onclick="document.getElementById('backup-file-input').click()" style="padding:0.75rem;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Select Backup File &amp; Restore
+            </button>
+          </div>
+        </div>
+      </div>
+    </div><!-- #page-backup-restore -->
+
+  </div><!-- #main -->
+
+</div><!-- #app -->
+
+<!-- ════════════════════════════════════════════════════
+     MODALS
+════════════════════════════════════════════════════ -->
+<!-- Bill View Modal -->
+<div id="modal-bill" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">🧾 Bill Preview</div>
+      <button class="btn-close-modal" onclick="closeModal('modal-bill')">✕</button>
+    </div>
+    <div class="modal-body" id="modal-bill-body" style="text-align:center;"></div>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div id="modal-delete" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">🗑 Confirm Delete</div>
+      <button class="btn-close-modal" onclick="closeModal('modal-delete')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-muted);font-size:0.9rem;">Are you sure you want to delete this expense entry? This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-delete')">Cancel</button>
+      <button class="btn btn-danger" id="modal-delete-confirm-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- USER MANAGEMENT MODALS -->
+<div id="modal-user" class="modal-overlay hidden">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-header">
+      <h3 id="user-modal-title">Create User</h3>
+      <button class="modal-close" onclick="closeUserModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="user-edit-username" />
+      <div class="form-group">
+        <label class="form-label">Full Name *</label>
+        <input id="user-name" class="form-control" placeholder="Enter full name" />
+      </div>
+      <div class="form-group" style="margin-top:1rem;">
+        <label class="form-label">Login ID *</label>
+        <input id="user-username" class="form-control" placeholder="Create your login ID" autocomplete="username" />
+      </div>
+      <div class="form-group" style="margin-top:1rem;">
+        <label class="form-label">Password *</label>
+        <input id="user-password" class="form-control" type="text" placeholder="Create password" autocomplete="off" spellcheck="false" />
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.3rem;">Visible so you can confirm it before saving.</div>
+      </div>
+      <div class="form-group" style="margin-top:1rem;">
+        <label class="form-label">Role</label>
+        <select id="user-role" class="form-control">
+          <option value="employee">Employee</option>
+          <option value="admin">Director / Admin</option>
+        </select>
+      </div>
+      <div id="user-modal-error" class="hidden" style="margin-top:1rem;padding:.7rem;border-radius:8px;background:rgba(248,113,113,.12);color:#fca5a5;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeUserModal()">Cancel</button>
+      <button class="btn btn-primary" id="save-user-btn" onclick="saveUserFromModal()">Save User</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-change-password" class="modal-overlay hidden">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-header">
+      <h3>🔑 Change Password</h3>
+      <button class="modal-close" onclick="closeChangePassword()">×</button>
+    </div>
+    <div class="modal-body">
+      <p class="text-muted text-sm" style="margin-bottom:1rem;">Enter your Login ID and current password, then choose a new password.</p>
+      <div class="form-group">
+        <label class="form-label">Login ID *</label>
+        <input id="cp-username" class="form-control" placeholder="Your Login ID" />
+      </div>
+      <div class="form-group" style="margin-top:1rem;">
+        <label class="form-label">Current Password *</label>
+        <input id="cp-current" class="form-control" type="password" placeholder="Current password" />
+      </div>
+      <div class="form-group" style="margin-top:1rem;">
+        <label class="form-label">New Password *</label>
+        <input id="cp-new" class="form-control" type="password" placeholder="New password" />
+      </div>
+      <div class="form-group" style="margin-top:1rem;">
+        <label class="form-label">Confirm New Password *</label>
+        <input id="cp-confirm" class="form-control" type="password" placeholder="Confirm new password" />
+      </div>
+      <div id="cp-error" class="hidden" style="margin-top:1rem;padding:.7rem;border-radius:8px;background:rgba(248,113,113,.12);color:#fca5a5;"></div>
+      <div id="cp-success" class="hidden" style="margin-top:1rem;padding:.7rem;border-radius:8px;background:rgba(34,211,165,.12);color:#86efac;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeChangePassword()">Cancel</button>
+      <button class="btn btn-primary" onclick="changePassword()">Update Password</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEAD MANAGEMENT MODAL -->
+<div id="modal-lead" class="modal-overlay hidden">
+  <div class="modal" style="max-width:680px;">
+    <div class="modal-header">
+      <h3 id="lead-modal-title">Add Lead</h3>
+      <button class="modal-close" onclick="closeLeadModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="lead-edit-id" />
+      <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:1rem;">
+
+        <!-- 1. Lead Date -->
+        <div class="form-group">
+          <label class="form-label" for="ld-date">Lead Date *</label>
+          <input id="ld-date" class="form-control" type="date" required />
+        </div>
+
+        <!-- 2. Company Name -->
+        <div class="form-group">
+          <label class="form-label" for="ld-company">Company Name *</label>
+          <input id="ld-company" class="form-control" type="text" placeholder="e.g. Kadi Nagrik Bank" required />
+        </div>
+
+        <!-- 3. Contact Person Name -->
+        <div class="form-group">
+          <label class="form-label" for="ld-contact-person">Contact Person Name *</label>
+          <input id="ld-contact-person" class="form-control" type="text" placeholder="e.g. Ajit Patel" required />
+        </div>
+
+        <!-- 4. Contact Number -->
+        <div class="form-group">
+          <label class="form-label" for="ld-contact-no">Contact Number *</label>
+          <input id="ld-contact-no" class="form-control" type="tel" placeholder="e.g. 6585965235" required />
+        </div>
+
+        <!-- 5. Contact Post -->
+        <div class="form-group">
+          <label class="form-label" for="ld-contact-post">Contact Post (Designation)</label>
+          <input id="ld-contact-post" class="form-control" type="text" placeholder="e.g. IT Head" />
+        </div>
+
+        <!-- 6. City -->
+        <div class="form-group">
+          <label class="form-label" for="ld-city">City</label>
+          <input id="ld-city" class="form-control" type="text" placeholder="e.g. Kadi" />
+        </div>
+
+        <!-- 7. Meeting -->
+        <div class="form-group">
+          <label class="form-label" for="ld-meeting">Meeting</label>
+          <select id="ld-meeting" class="form-control" onchange="toggleLastMeetingDate()">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+
+        <!-- 8. Last Meeting Date -->
+        <div class="form-group">
+          <label class="form-label" for="ld-last-meeting">Last Meeting Date</label>
+          <input id="ld-last-meeting" class="form-control" type="date" disabled style="opacity:0.5;" />
+        </div>
+
+        <!-- 9. Proposal -->
+        <div class="form-group">
+          <label class="form-label" for="ld-proposal">Proposal</label>
+          <select id="ld-proposal" class="form-control">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+
+        <!-- 10. Lead Stage -->
+        <div class="form-group">
+          <label class="form-label" for="ld-stage">Lead Stage *</label>
+          <select id="ld-stage" class="form-control" required>
+            <option value="">-- Select Stage --</option>
+            <option>New</option>
+            <option>Follow-up</option>
+            <option>Proposal</option>
+            <option>Negotiation</option>
+            <option>Won</option>
+            <option>Lost</option>
+          </select>
+        </div>
+
+      </div>
+      <div id="lead-modal-error" class="hidden" style="margin-top:1rem;padding:.7rem;border-radius:8px;background:rgba(248,113,113,.12);color:#fca5a5;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeLeadModal()">Cancel</button>
+      <button class="btn btn-primary" id="save-lead-btn" onclick="saveLeadFromModal()">Save Lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lead Delete Confirm Modal -->
+<div id="modal-lead-delete" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">🗑 Delete Lead</div>
+      <button class="btn-close-modal" onclick="closeModal('modal-lead-delete')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-muted);font-size:0.9rem;">Are you sure you want to delete this lead? This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-lead-delete')">Cancel</button>
+      <button class="btn btn-danger" id="modal-lead-delete-confirm-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- EARNING MODAL -->
+<div id="modal-earning" class="modal-overlay hidden">
+  <div class="modal" style="max-width:680px;">
+    <div class="modal-header">
+      <h3 id="earning-modal-title">Add Earning</h3>
+      <button class="modal-close" onclick="closeEarningModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="earning-edit-id" />
+      <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:1rem;">
+
+        <!-- 1. Earning Date -->
+        <div class="form-group">
+          <label class="form-label" for="er-date">Earning Date *</label>
+          <input id="er-date" class="form-control" type="date" required />
+        </div>
+
+        <!-- 2. Total Earning Fund -->
+        <div class="form-group">
+          <label class="form-label" for="er-fund">Total Earning Fund *</label>
+          <input id="er-fund" class="form-control" type="number" min="0" step="0.01" placeholder="e.g. 1000" required oninput="calcEarningBalance()" />
+        </div>
+
+        <!-- 3. Hold in Sentory1 Bank -->
+        <div class="form-group">
+          <label class="form-label" for="er-hold">Hold in Sentory1 Bank *</label>
+          <input id="er-hold" class="form-control" type="number" min="0" step="0.01" placeholder="e.g. 100" required oninput="calcEarningBalance()" />
+        </div>
+
+        <!-- 4. Total Earning Balance -->
+        <div class="form-group">
+          <label class="form-label" for="er-balance">Total Earning Balance
+            <span style="font-size:0.72rem;color:var(--accent3);font-weight:400;margin-left:0.4rem;">auto-calculated</span>
+          </label>
+          <input id="er-balance" class="form-control" type="number" placeholder="0.00" disabled style="background:rgba(255,255,255,0.03);opacity:0.8;" />
+        </div>
+
+        <!-- 5. My Earning Share Fund -->
+        <div class="form-group">
+          <label class="form-label" for="er-share">My Earning Share Fund *
+            <span style="font-size:0.72rem;color:var(--accent3);font-weight:400;margin-left:0.4rem;">auto 15% of Balance</span>
+          </label>
+          <input id="er-share" class="form-control" type="number" min="0" step="0.01" placeholder="e.g. 70" required />
+        </div>
+
+        <!-- 6. Share Fund Status -->
+        <div class="form-group">
+          <label class="form-label" for="er-status">Share Fund Status *</label>
+          <select id="er-status" class="form-control" required onchange="toggleEarningReceivedFields()">
+            <option value="Pending">Pending</option>
+            <option value="Receive">Receive</option>
+          </select>
+        </div>
+
+        <!-- 7. Received Date -->
+        <div class="form-group">
+          <label class="form-label" for="er-received-date">Received Date</label>
+          <input id="er-received-date" class="form-control" type="date" disabled style="opacity:0.5;" />
+        </div>
+
+        <!-- 8. Received Mode -->
+        <div class="form-group">
+          <label class="form-label" for="er-received-mode">Received Mode</label>
+          <select id="er-received-mode" class="form-control" disabled style="opacity:0.5;">
+            <option value="">-- Select Mode --</option>
+            <option value="Bank">Bank</option>
+            <option value="UPI">UPI</option>
+            <option value="Cash">Cash</option>
+            <option value="Cheque">Cheque</option>
+            <option value="Online">Online</option>
+            <option value="NEFT">NEFT</option>
+          </select>
+        </div>
+
+      </div>
+      <div id="earning-modal-error" class="hidden" style="margin-top:1rem;padding:.7rem;border-radius:8px;background:rgba(248,113,113,.12);color:#fca5a5;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeEarningModal()">Cancel</button>
+      <button class="btn btn-primary" id="save-earning-btn" onclick="saveEarningFromModal()">Save Earning</button>
+    </div>
+  </div>
+</div>
+
+<!-- Earning Delete Confirm Modal -->
+<div id="modal-earning-delete" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">🗑 Delete Earning</div>
+      <button class="btn-close-modal" onclick="closeModal('modal-earning-delete')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-muted);font-size:0.9rem;">Are you sure you want to delete this earning record? This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-earning-delete')">Cancel</button>
+      <button class="btn btn-danger" id="modal-earning-delete-confirm-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+
+<!-- ════════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   ELECTRON STORAGE BRIDGE
+   When running inside Electron, window.electronAPI is injected by preload.js.
+   This bridge transparently patches localStorage so ALL existing app code
+   works identically in both the browser and the desktop app — zero changes
+   needed to the rest of the code.
+══════════════════════════════════════════════════════════════════════════════ */
+(function patchLocalStorage() {
+  if (typeof window.electronAPI === 'undefined') return; // Browser mode — use real localStorage
+
+  // Build a proxy that mirrors the localStorage API but delegates to electron-store
+  const _api = window.electronAPI;
+
+  const ElectronStorage = {
+    get length() {
+      return _api.getAllKeys().length;
+    },
+    getItem(key) {
+      const val = _api.getData(key);
+      return val === undefined ? null : (typeof val === 'string' ? val : JSON.stringify(val));
+    },
+    setItem(key, value) {
+      // Store strings as-is; they'll be retrieved as strings
+      _api.setData(key, value);
+    },
+    removeItem(key) {
+      _api.removeData(key);
+    },
+    clear() {
+      _api.clearAll();
+    },
+    key(index) {
+      return _api.getAllKeys()[index] || null;
+    },
+    // Symbol.iterator support for Object.keys(localStorage) pattern
+    keys() {
+      return _api.getAllKeys();
+    },
+  };
+
+  // Intercept Object.keys(localStorage) — used in clear-data and avatar-count logic
+  Object.defineProperty(window, 'localStorage', {
+    get() { return ElectronStorage; },
+    configurable: true,
+  });
+
+  // Also patch Object.keys to work on our proxy (used as: Object.keys(localStorage))
+  const _origKeys = Object.keys;
+  Object.keys = function(obj) {
+    if (obj === ElectronStorage) return _api.getAllKeys();
+    return _origKeys(obj);
+  };
+
+  console.log('[Sentory1] Running in Electron — using persistent electron-store for data.');
+})();
+
+// One-time clear of all expenses, leads, and avatars by assistant
+if (!localStorage.getItem('sentory1_cleared_by_assistant_v1')) {
+  const keysToRemove = Object.keys(localStorage).filter(k =>
+    k === 'sentory1_expenses' ||
+    k === 'sentory1_leads' ||
+    k.startsWith('sentory1_avatar_')
+  );
+  keysToRemove.forEach(k => localStorage.removeItem(k));
+  localStorage.setItem('sentory1_cleared_by_assistant_v1', 'true');
+}
+
+/* ── CONSTANTS ── */
+const EXPENSE_HEADS = ['Developing Charge', 'Server Charge'];
+const PAYMENT_MODES = ['Cash','Bank','UPI','Card','Cheque'];
+const ROWS_PER_PAGE = 10;
+
+/* ── USERS ── */
+const DEFAULT_USERS = [
+  { id:'u1', username:'admin', password:'admin123', name:'Sonu kumar Suthar', role:'admin' },
+  { id:'u2', username:'emp1',  password:'emp123',   name:'Raj Kumar',  role:'employee' },
+  { id:'u3', username:'emp2',  password:'emp456',   name:'Priya Singh', role:'employee' },
+];
+
+function loadUsers() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('sentory1_users') || 'null');
+    if (Array.isArray(saved) && saved.length) return saved;
+  } catch(e) {}
+  localStorage.setItem('sentory1_users', JSON.stringify(DEFAULT_USERS));
+  return DEFAULT_USERS.map(u => ({...u}));
+}
+function saveUsers(users) {
+  localStorage.setItem('sentory1_users', JSON.stringify(users));
+}
+let USERS = loadUsers();
+
+/* ── STATE ── */
+let currentUser = null;
+let currentPage = 'dashboard';
+let editExpenseId = null;
+let currentReportTab = 'monthly';
+let filterState = {};
+let listPage = 1;
+let reportExpenses = [];
+let deleteTargetId = null;
+
+/* ══════════════════════════════════════════════════
+   DATA LAYER (localStorage)
+══════════════════════════════════════════════════ */
+function getExpenses() {
+  return JSON.parse(localStorage.getItem('sentory1_expenses') || '[]');
+}
+function saveExpenses(data) {
+  localStorage.setItem('sentory1_expenses', JSON.stringify(data));
+}
+function genId() {
+  return 'exp_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+}
+function formatDate(d) {
+  if (!d) return '';
+  const dt = new Date(d + 'T00:00:00');
+  return dt.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+}
+function fmtAmt(n) {
+  return '₹' + Number(n).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+function todayISO() {
+  return new Date().toISOString().slice(0,10);
+}
+function monthISO() {
+  return new Date().toISOString().slice(0,7);
+}
+
+/* ══════════════════════════════════════════════════
+   AUTH
+══════════════════════════════════════════════════ */
+function initAuth() {
+  const saved = localStorage.getItem('sentory1_session');
+  if (saved) {
+    const sessionUser = JSON.parse(saved);
+    // Re-sync against the persisted user store in case an admin edited this account elsewhere.
+    const fresh = loadUsers().find(u => u.id === sessionUser.id);
+    if (!fresh) {
+      localStorage.removeItem('sentory1_session');
+      return;
+    }
+    currentUser = fresh;
+    showApp();
+  }
+}
+document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('login-password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('change-password-btn').addEventListener('click', openChangePassword);
+
+function doLogin() {
+  USERS = loadUsers();
+  const uname = document.getElementById('login-username').value.trim();
+  const pass  = document.getElementById('login-password').value;
+  const err   = document.getElementById('login-error');
+  const user  = USERS.find(u => u.username.toLowerCase() === uname.toLowerCase() && u.password === pass);
+  if (!user) {
+    err.textContent = 'Invalid Login ID or Password. Please try again.';
+    err.classList.remove('hidden');
+    return;
+  }
+  err.classList.add('hidden');
+  currentUser = user;
+  localStorage.setItem('sentory1_session', JSON.stringify(user));
+  showApp();
+}
+
+function openChangePassword() {
+  document.getElementById('modal-change-password').classList.remove('hidden');
+  document.getElementById('cp-error').classList.add('hidden');
+  document.getElementById('cp-success').classList.add('hidden');
+  const savedUser = currentUser || null;
+  document.getElementById('cp-username').value = savedUser ? savedUser.username : document.getElementById('login-username').value.trim();
+}
+function closeChangePassword() {
+  document.getElementById('modal-change-password').classList.add('hidden');
+}
+function changePassword() {
+  USERS=loadUsers();
+  const username=document.getElementById('cp-username').value.trim();
+  const current=document.getElementById('cp-current').value;
+  const next=document.getElementById('cp-new').value;
+  const confirm=document.getElementById('cp-confirm').value;
+  const err=document.getElementById('cp-error');
+  const ok=document.getElementById('cp-success');
+  err.classList.add('hidden'); ok.classList.add('hidden');
+  const user=USERS.find(u=>u.username.toLowerCase()===username.toLowerCase());
+  if(!user || user.password!==current){err.textContent='Login ID or current password is incorrect.';err.classList.remove('hidden');return;}
+  if(next.length<6){err.textContent='New password must be at least 6 characters.';err.classList.remove('hidden');return;}
+  if(next!==confirm){err.textContent='New passwords do not match.';err.classList.remove('hidden');return;}
+  user.password=next; saveUsers(USERS);
+  if(currentUser && currentUser.username===user.username){
+    currentUser={...user}; localStorage.setItem('sentory1_session',JSON.stringify(currentUser));
+  }
+  ok.textContent='Password updated successfully.'; ok.classList.remove('hidden');
+  document.getElementById('cp-current').value='';
+  document.getElementById('cp-new').value='';
+  document.getElementById('cp-confirm').value='';
+}
+
+function openUserModal(username) {
+  if(!currentUser || currentUser.role!=='admin'){showToast('Only Director/Admin can manage users.','error');return;}
+  document.getElementById('modal-user').classList.remove('hidden');
+  document.getElementById('user-modal-error').classList.add('hidden');
+  document.getElementById('user-edit-username').value=username||'';
+  document.getElementById('user-modal-title').textContent=username?'Edit User':'Create User';
+  document.getElementById('save-user-btn').textContent=username?'Update User':'Save User';
+  if(username){
+    const u=loadUsers().find(x=>x.username===username);
+    if(u){
+      document.getElementById('user-name').value=u.name;
+      document.getElementById('user-username').value=u.username;
+      document.getElementById('user-password').value=u.password;
+      document.getElementById('user-role').value=u.role;
+    }
+  } else {
+    ['user-name','user-username','user-password'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('user-role').value='employee';
+  }
+}
+function closeUserModal(){document.getElementById('modal-user').classList.add('hidden');}
+function saveUserFromModal(){
+  USERS=loadUsers();
+  const old=document.getElementById('user-edit-username').value;
+  const name=document.getElementById('user-name').value.trim();
+  const username=document.getElementById('user-username').value.trim();
+  const password=document.getElementById('user-password').value;
+  const role=document.getElementById('user-role').value;
+  const err=document.getElementById('user-modal-error');
+  const fail=(m)=>{err.textContent=m;err.classList.remove('hidden');};
+  if(!name||!username||!password)return fail('Please fill all required fields.');
+  if(username.length<3)return fail('Login ID must be at least 3 characters.');
+  if(password.length<6)return fail('Password must be at least 6 characters.');
+  if(USERS.some(u=>u.username.toLowerCase()===username.toLowerCase() && u.username!==old))return fail('This Login ID already exists.');
+  if(old){
+    const u=USERS.find(x=>x.username===old);
+    if(!u)return fail('User not found.');
+    const demotingLastAdmin = u.role==='admin' && role!=='admin' && USERS.filter(x=>x.role==='admin').length<=1;
+    if(demotingLastAdmin) return fail('At least one Director/Admin account must remain.');
+    u.name=name;u.username=username;u.password=password;u.role=role==='admin'?'admin':'employee';
+    if(currentUser.username===old){currentUser={...u};localStorage.setItem('sentory1_session',JSON.stringify(currentUser));}
+  }else{
+    USERS.push({id:'u_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),name,username,password,role:role==='admin'?'admin':'employee'});
+  }
+  saveUsers(USERS);closeUserModal();renderUsers();
+  if(currentUser.username===username)showApp();
+  showToast(old?'User updated successfully.':'User created successfully.','success');
+}
+function deleteManagedUser(username){
+  if(!currentUser || currentUser.role!=='admin')return;
+  if(username===currentUser.username){showToast('You cannot delete the account you are currently using.','error');return;}
+  USERS=loadUsers();
+  const target = USERS.find(u=>u.username===username);
+  if(!target)return;
+  if(USERS.length<=1){showToast('At least one user must remain.','error');return;}
+  if(target.role==='admin' && USERS.filter(u=>u.role==='admin').length<=1){
+    showToast('At least one Director/Admin account must remain.','error');return;
+  }
+  USERS=USERS.filter(u=>u.username!==username);
+  saveUsers(USERS);renderUsers();showToast('User deleted successfully.','success');
+}
+function renderUsers(){
+  const tbody=document.getElementById('users-tbody');
+  if(!tbody)return;
+  USERS=loadUsers();
+  tbody.innerHTML=USERS.map(u=>`<tr>
+    <td><strong>${escapeHtml(u.name)}</strong></td>
+    <td>${escapeHtml(u.username)}</td>
+    <td><span class="user-role ${u.role==='admin'?'role-admin':'role-employee'}">${u.role==='admin'?'Director / Admin':'Employee'}</span></td>
+    <td>
+      <button class="btn btn-ghost btn-sm" onclick="openUserModal('${escapeJs(u.username)}')">Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteManagedUser('${escapeJs(u.username)}')">Delete</button>
+    </td>
+  </tr>`).join('');
+}
+function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function escapeJs(v){return String(v).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+  localStorage.removeItem('sentory1_session');
+  currentUser = null;
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('page-login').classList.remove('hidden');
+  document.getElementById('login-username').value = '';
+  document.getElementById('login-password').value = '';
+  showToast('Logged out successfully', 'info');
+});
+
+function showApp() {
+  USERS = loadUsers();
+  document.getElementById('page-login').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  // populate sidebar user info
+  renderSidebarAvatar();
+  document.getElementById('sb-name').textContent = currentUser.name;
+  const roleEl = document.getElementById('sb-role');
+  roleEl.textContent = currentUser.role === 'admin' ? 'Admin / Director' : 'Employee';
+  roleEl.className = 'user-role ' + (currentUser.role === 'admin' ? 'role-admin' : 'role-employee');
+  document.querySelectorAll('.admin-only-nav').forEach(el => el.style.display = currentUser.role === 'admin' ? '' : 'none');
+  // topbar date
+  document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+
+  document.getElementById('rpt-month').value = monthISO();
+  document.getElementById('rpt-year').value  = new Date().getFullYear();
+  document.getElementById('rpt-day').value   = todayISO();
+  navigateTo('dashboard');
+}
+
+/* ══════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════ */
+const PAGE_META = {
+  'dashboard':        { title:'Dashboard',        subtitle:'Overview of your expenses' },
+  'add-expense':      { title:'Add Expense',      subtitle:'Create a new expense entry' },
+  'expense-list':     { title:'Expense List',     subtitle:'View and manage all expenses' },
+  'my-expenses':      { title:'My Expenses',      subtitle:'Total expense summary & category breakdown' },
+  'reports':          { title:'Reports',          subtitle:'Analyse and export expense data' },
+  'user-management':  { title:'User Management',  subtitle:'Manage Login IDs, passwords and roles' },
+  'lead-management':  { title:'Lead Management',  subtitle:'Track and manage all sales leads' },
+  'earning-management': { title:'Earning Management', subtitle:'Track and manage all earnings and share funds' },
+  'backup-restore':   { title:'Backup & Restore', subtitle:'Export or import complete application database' },
+  'clear-data':       { title:'Clear All Data',   subtitle:'Permanently remove all application data' },
+};
+
+function navigateTo(page) {
+  if (page === 'user-management' && (!currentUser || currentUser.role !== 'admin')) {
+    showToast('Only Director/Admin can manage users.', 'error');
+    page = 'dashboard';
+  }
+  if ((page === 'clear-data' || page === 'backup-restore') && (!currentUser || currentUser.role !== 'admin')) {
+    showToast('Only Director/Admin can access this section.', 'error');
+    page = 'dashboard';
+  }
+  if (page === 'clear-data') {
+    // Reset confirmation input when page loads
+    setTimeout(() => {
+      const inp = document.getElementById('clear-confirm-input');
+      const btn = document.getElementById('clear-data-btn');
+      if (inp) inp.value = '';
+      if (btn) btn.disabled = true;
+      renderClearDataSummary();
+    }, 50);
+  }
+  currentPage = page;
+  // hide all pages
+  document.querySelectorAll('[id^="page-"]:not(#page-login)').forEach(el => el.classList.add('hidden'));
+  document.getElementById('page-' + page).classList.remove('hidden');
+  // nav active
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + page);
+  if (navEl) navEl.classList.add('active');
+  // topbar
+  const meta = PAGE_META[page] || {};
+  document.getElementById('topbar-title').textContent = meta.title || '';
+  document.getElementById('topbar-subtitle').textContent = meta.subtitle || '';
+
+  if (page === 'dashboard')       renderDashboard();
+  if (page === 'user-management') renderUsers();
+  if (page === 'expense-list')    { listPage = 1; renderExpenseList(); }
+  if (page === 'reports')         buildReport();
+  if (page === 'my-expenses')     renderMyExpenses();
+  if (page === 'add-expense' && !editExpenseId) resetExpenseForm();
+  if (page === 'lead-management') { leadListPage = 1; renderLeadList(); }
+  if (page === 'earning-management') { earningListPage = 1; renderEarningList(); }
+}
+
+// Nav clicks
+document.querySelectorAll('.nav-item[data-page]').forEach(el => {
+  el.addEventListener('click', () => navigateTo(el.dataset.page));
+});
+
+/* ══════════════════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════════════════ */
+function getUserExpenses() {
+  const all = getExpenses();
+  if (currentUser.role === 'admin') return all;
+  return all.filter(e => e.createdBy === currentUser.id);
+}
+
+function renderDashboard() {
+  try {
+    const allExpenses  = getExpenses();
+    const myExpenses   = getUserExpenses();
+
+    // Earnings Stats
+    const myEarnings = getUserEarnings();
+    const totalFund  = myEarnings.reduce((s, e) => s + Number(e.fund || 0), 0);
+    const totalHold  = myEarnings.reduce((s, e) => s + Number(e.hold || 0), 0);
+    const totalBal   = totalFund - totalHold;
+    const totalShare = myEarnings.reduce((s, e) => s + Number(e.share || 0), 0);
+    const earnTotalCount = myEarnings.length;
+
+    document.getElementById('db-stat-earning-fund').textContent = fmtAmt(totalFund);
+    document.getElementById('db-stat-earning-fund-count').textContent = `${earnTotalCount} record${earnTotalCount !== 1 ? 's' : ''}`;
+    document.getElementById('db-stat-earning-hold').textContent = fmtAmt(totalHold);
+    document.getElementById('db-stat-earning-share').textContent = fmtAmt(totalShare);
+    
+    const isAdmin = currentUser ? currentUser.role === 'admin' : false;
+    document.getElementById('db-stat-earning-share-label').textContent = 
+      isAdmin ? 'Total Share Fund (All Users)' : 'My Earning Share Fund';
+
+    // Total Sentory1 Expense — grand total of all sentoryTotal values entered by users
+    const sentoryTotal = allExpenses.reduce((s, e) => s + Number(e.sentoryTotal || 0), 0);
+    document.getElementById('stat-sentory-total').textContent = fmtAmt(sentoryTotal);
+    document.getElementById('stat-sentory-count').textContent = `${allExpenses.length} total entr${allExpenses.length !== 1 ? 'ies' : 'y'}`;
+
+    // My Expense — current user total
+    const myTotal = myExpenses.reduce((s, e) => s + Number(e.amount), 0);
+    document.getElementById('stat-my-total').textContent = fmtAmt(myTotal);
+    document.getElementById('stat-my-count').textContent = `${myExpenses.length} entr${myExpenses.length !== 1 ? 'ies' : 'y'} by me`;
+
+    // Net Profit: my earning share fund - my expense
+    const profit = totalShare - myTotal;
+    const profitEl = document.getElementById('db-stat-profit');
+    if (profitEl) {
+      profitEl.textContent = fmtAmt(profit);
+      profitEl.style.color = profit < 0 ? 'var(--red)' : 'var(--green)';
+    }
+
+    // Recent 5
+    const recent = [...allExpenses].sort((a,b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || '').localeCompare(a.createdAt || '')).slice(0, 5);
+    const tbody = document.getElementById('recent-tbody');
+    tbody.innerHTML = recent.length ? recent.map(e => {
+      const u = USERS.find(x => x.id === e.createdBy);
+      const expMonthFmt = e.expMonth ? new Date(e.expMonth + '-01').toLocaleDateString('en-IN', {month:'short', year:'numeric'}) : '—';
+      return `<tr>
+        <td>${formatDate(e.date)}</td>
+        <td style="color:var(--text-muted)">${expMonthFmt}</td>
+        <td><span class="badge badge-head">${e.head}</span></td>
+        <td style="font-weight:700;color:var(--accent2)">${fmtAmt(e.amount)}</td>
+        <td><span class="badge badge-${e.mode.toLowerCase()}">${e.mode}</span></td>
+        <td>${e.vendor || '—'}</td>
+        <td style="color:var(--text-muted)">${u ? u.name : 'Unknown'}</td>
+      </tr>`;
+    }).join('') : `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-muted)">No expenses yet.</td></tr>`;
+  } catch (error) {
+    alert("Runtime Error in renderDashboard: " + error.message + "\nStack: " + error.stack);
+    console.error("Render Dashboard Error:", error);
+  }
+}
+
+function renderDonut(monthExp) {
+  const catMap = {};
+  monthExp.forEach(e => { catMap[e.head] = (catMap[e.head]||0) + Number(e.amount); });
+  const entries = Object.entries(catMap).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const COLORS = ['#6366f1','#22d3a5','#f59e0b','#f87171','#38bdf8','#c084fc'];
+  const total = entries.reduce((s,[,v])=>s+v,0);
+
+  const svg = document.getElementById('donut-svg');
+  const legend = document.getElementById('donut-legend');
+  svg.innerHTML = '';
+  legend.innerHTML = '';
+
+  if (!entries.length) {
+    svg.innerHTML = '<circle cx="60" cy="60" r="40" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="20"/>';
+    legend.innerHTML = '<div style="color:var(--text-muted);font-size:0.8rem;">No data</div>';
+    return;
+  }
+
+  let offset = -90;
+  const cx=60, cy=60, r=40, stroke=20;
+  entries.forEach(([name, val], i) => {
+    const pct = val / total;
+    const deg = pct * 360;
+    const circ = 2 * Math.PI * r;
+    const dash = (pct * circ);
+    const gap  = circ - dash;
+    const el = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    el.setAttribute('cx', cx); el.setAttribute('cy', cy); el.setAttribute('r', r);
+    el.setAttribute('fill','none');
+    el.setAttribute('stroke', COLORS[i % COLORS.length]);
+    el.setAttribute('stroke-width', stroke);
+    el.setAttribute('stroke-dasharray', `${dash.toFixed(2)} ${gap.toFixed(2)}`);
+    el.setAttribute('stroke-dashoffset', -(offset / 360 * circ).toFixed(2));
+    el.setAttribute('transform', `rotate(-90 ${cx} ${cy})`);
+    el.style.transition = 'stroke-dasharray 0.8s ease';
+    svg.appendChild(el);
+    offset += deg;
+
+    const li = document.createElement('div');
+    li.className = 'donut-item';
+    li.innerHTML = `
+      <div class="donut-dot" style="background:${COLORS[i%COLORS.length]}"></div>
+      <span class="donut-item-label">${name}</span>
+      <span class="donut-item-val">${fmtAmt(val)}</span>
+    `;
+    legend.appendChild(li);
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   EXPENSE FORM
+══════════════════════════════════════════════════ */
+let currentBillData = null; // base64 or null
+
+function resetExpenseForm() {
+  editExpenseId = null;
+  document.getElementById('expense-form-title').textContent = 'New Expense Entry';
+  document.getElementById('expense-save-btn').textContent = '';
+  document.getElementById('expense-save-btn').innerHTML = `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+    Save Expense`;
+
+  document.getElementById('f-exp-month').value     = monthISO();
+  document.getElementById('f-head').value           = '';
+  document.getElementById('f-sentory-total').value  = '';
+  document.getElementById('f-amount').value         = '';
+  document.getElementById('f-paid-date').value      = todayISO();
+  document.getElementById('f-vendor').value = '';
+  document.getElementById('f-remarks').value = '';
+  document.querySelectorAll('.payment-radio').forEach(r => r.checked = false);
+  document.getElementById('f-bill').value = '';
+  currentBillData = null;
+  const ua = document.getElementById('file-upload-area');
+  ua.classList.remove('has-file');
+  document.getElementById('file-upload-text').textContent = 'Click to upload bill (JPG, PNG, PDF)';
+  updateTotalExpenseDisplay();
+}
+
+function loadExpenseForEdit(id) {
+  const exps = getExpenses();
+  const exp  = exps.find(e => e.id === id);
+  if (!exp) return;
+  editExpenseId = id;
+  document.getElementById('expense-form-title').textContent = 'Edit Expense';
+  document.getElementById('expense-save-btn').innerHTML = `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+    Update Expense`;
+
+  document.getElementById('f-exp-month').value    = exp.expMonth || '';
+  document.getElementById('f-head').value         = exp.head;
+  document.getElementById('f-sentory-total').value = exp.sentoryTotal || '';
+  document.getElementById('f-amount').value       = exp.amount;
+  document.getElementById('f-paid-date').value    = exp.paidDate || '';
+  document.getElementById('f-vendor').value    = exp.vendor || '';
+  document.getElementById('f-remarks').value   = exp.remarks || '';
+  const radio = document.querySelector(`.payment-radio[value="${exp.mode}"]`);
+  if (radio) radio.checked = true;
+  currentBillData = exp.bill || null;
+  if (currentBillData) {
+    document.getElementById('file-upload-area').classList.add('has-file');
+    document.getElementById('file-upload-text').textContent = '✅ Bill attached (click to replace)';
+  }
+  updateTotalExpenseDisplay();
+  navigateTo('add-expense');
+}
+
+function handleFileSelect(evt) {
+  const file = evt.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { showToast('File too large (max 5 MB)', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    currentBillData = { data: e.target.result, name: file.name, type: file.type };
+    document.getElementById('file-upload-area').classList.add('has-file');
+    document.getElementById('file-upload-text').textContent = `✅ ${file.name}`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function calcMyExpense() {
+  const sentory = parseFloat(document.getElementById('f-sentory-total').value) || 0;
+  const myAmt   = parseFloat((sentory * 0.15).toFixed(2));
+  document.getElementById('f-amount').value = myAmt > 0 ? myAmt : '';
+  updateTotalExpenseDisplay();
+}
+
+function updateTotalExpenseDisplay() {
+  // nothing to update — f-sentory-total is a user-entered field
+}
+
+function saveExpense() {
+  const date     = editExpenseId ? (getExpenses().find(e => e.id === editExpenseId)?.date || todayISO()) : todayISO();
+  const expMonth = document.getElementById('f-exp-month').value;
+  const head     = document.getElementById('f-head').value;
+  const amount   = document.getElementById('f-amount').value;
+  const paidDate    = document.getElementById('f-paid-date').value;
+  const sentoryTotal = parseFloat(document.getElementById('f-sentory-total').value) || 0;
+  const mode        = document.querySelector('.payment-radio:checked')?.value;
+  const vendor   = document.getElementById('f-vendor').value.trim();
+  const remarks  = document.getElementById('f-remarks').value.trim();
+
+  if (!expMonth || !head || !amount || !mode) {
+    showToast('Please fill all required fields (Expense Month, Head, Amount, Payment Mode)', 'error');
+    return;
+  }
+  if (Number(amount) <= 0) { showToast('Amount must be greater than 0', 'error'); return; }
+
+  const exps = getExpenses();
+  if (editExpenseId) {
+    const idx = exps.findIndex(e => e.id === editExpenseId);
+    if (idx > -1) {
+      exps[idx] = { ...exps[idx], date, expMonth, head, amount: Number(amount), sentoryTotal, paidDate, mode, vendor, remarks, bill: currentBillData };
+      saveExpenses(exps);
+      showToast('Expense updated successfully!', 'success');
+    }
+    editExpenseId = null;
+  } else {
+    const newExp = {
+      id: genId(), date, expMonth, head, amount: Number(amount), sentoryTotal, paidDate, mode, vendor, remarks,
+      bill: currentBillData,
+      createdBy: currentUser.id,
+      createdAt: new Date().toISOString()
+    };
+    exps.unshift(newExp);
+    saveExpenses(exps);
+    showToast('Expense saved successfully!', 'success');
+  }
+  navigateTo('expense-list');
+}
+
+/* ══════════════════════════════════════════════════
+   EXPENSE LIST
+══════════════════════════════════════════════════ */
+function applyFilters() {
+  filterState = {
+    from:   document.getElementById('fl-from').value,
+    to:     document.getElementById('fl-to').value,
+    head:   document.getElementById('fl-head').value,
+    mode:   document.getElementById('fl-mode').value,
+    vendor: document.getElementById('fl-vendor').value.toLowerCase(),
+  };
+  listPage = 1;
+  renderExpenseList();
+}
+function clearFilters() {
+  document.getElementById('fl-from').value = '';
+  document.getElementById('fl-to').value   = '';
+  document.getElementById('fl-head').value = '';
+  document.getElementById('fl-mode').value = '';
+  document.getElementById('fl-vendor').value = '';
+  filterState = {};
+  listPage = 1;
+  renderExpenseList();
+}
+
+function getFilteredExpenses() {
+  let list = getUserExpenses().sort((a,b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
+  const { from, to, head, mode, vendor } = filterState;
+  if (from)   list = list.filter(e => e.date >= from);
+  if (to)     list = list.filter(e => e.date <= to);
+  if (head)   list = list.filter(e => e.head === head);
+  if (mode)   list = list.filter(e => e.mode === mode);
+  if (vendor) list = list.filter(e => (e.vendor||'').toLowerCase().includes(vendor));
+  return list;
+}
+
+function renderExpenseList() {
+  const allAdmin = currentUser.role === 'admin';
+  document.getElementById('col-added-by').style.display = allAdmin ? '' : 'none';
+
+  const filtered = getFilteredExpenses();
+  const total  = filtered.length;
+  const pages  = Math.max(1, Math.ceil(total / ROWS_PER_PAGE));
+  if (listPage > pages) listPage = pages;
+  const start  = (listPage - 1) * ROWS_PER_PAGE;
+  const rows   = filtered.slice(start, start + ROWS_PER_PAGE);
+
+  // Pagination info
+  document.getElementById('pagination-info').textContent =
+    `Showing ${total ? start+1 : 0}–${Math.min(start+ROWS_PER_PAGE, total)} of ${total} entries`;
+
+  // Pagination buttons
+  const pbContainer = document.getElementById('pagination-btns');
+  pbContainer.innerHTML = '';
+  for (let i=1; i<=pages; i++) {
+    if (pages > 7 && Math.abs(i - listPage) > 2 && i !== 1 && i !== pages) {
+      if (i === 2 || i === pages-1) { pbContainer.innerHTML += '<span style="color:var(--text-dim);padding:0 4px">…</span>'; }
+      continue;
+    }
+    const btn = document.createElement('button');
+    btn.className = 'page-btn' + (i === listPage ? ' active' : '');
+    btn.textContent = i;
+    btn.onclick = () => { listPage = i; renderExpenseList(); };
+    pbContainer.appendChild(btn);
+  }
+
+  // Table body
+  const tbody = document.getElementById('expense-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="12">
+      <div class="empty-state">
+        <div class="empty-state-icon">💼</div>
+        <h4>No expenses found</h4>
+        <p>Try adjusting your filters or add a new expense.</p>
+      </div>
+    </td></tr>`;
+    // Update total bar
+    document.getElementById('expense-total-amt').textContent = fmtAmt(0);
+    return;
+  }
+
+  tbody.innerHTML = rows.map((e, i) => {
+    const u = USERS.find(x=>x.id===e.createdBy);
+    const billBtn = e.bill
+      ? `<button class="btn btn-ghost btn-sm" onclick="viewBill('${e.id}')">👁 View</button>`
+      : `<span style="color:var(--text-dim);font-size:0.78rem;">—</span>`;
+
+    let actions = allAdmin
+      ? `<button class="btn btn-ghost btn-sm btn-icon" title="Edit" onclick="loadExpenseForEdit('${e.id}')">✏️</button>
+         <button class="btn btn-danger btn-sm btn-icon" title="Delete" onclick="confirmDelete('${e.id}')">🗑</button>`
+      : (e.createdBy === currentUser.id
+          ? `<button class="btn btn-ghost btn-sm btn-icon" title="Edit" onclick="loadExpenseForEdit('${e.id}')">✏️</button>
+             <button class="btn btn-danger btn-sm btn-icon" title="Delete" onclick="confirmDelete('${e.id}')">🗑</button>`
+          : '<span style="color:var(--text-dim);font-size:0.78rem;">—</span>');
+
+    const expMonthFmt = e.expMonth ? new Date(e.expMonth + '-01').toLocaleDateString('en-IN',{month:'short',year:'numeric'}) : '—';
+    const sentoryAmt = Number(e.sentoryTotal || 0);
+    return `<tr>
+      <td style="color:var(--text-dim)">${start+i+1}</td>
+      <td>${formatDate(e.date)}</td>
+      <td style="color:var(--text-muted);white-space:nowrap">${expMonthFmt}</td>
+      <td><span class="badge badge-head">${e.head}</span></td>
+      <td style="font-weight:700;color:var(--accent2)">${fmtAmt(e.amount)}</td>
+      <td style="font-weight:700;color:var(--green);white-space:nowrap">${sentoryAmt > 0 ? fmtAmt(sentoryAmt) : '—'}</td>
+      <td><span class="badge badge-${e.mode.toLowerCase()}">${e.mode}</span></td>
+      <td>${e.vendor||'—'}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-muted)">${e.remarks||'—'}</td>
+      <td>${billBtn}</td>
+      <td style="${allAdmin?'':'display:none'};color:var(--text-muted)">${u?u.name:'Unknown'}</td>
+      <td><div class="action-btns">${actions}</div></td>
+    </tr>`;
+  }).join('');
+
+  // Update Total Expense bar — sum of sentoryTotal for all filtered rows
+  const filteredTotal = filtered.reduce((s,e) => s + Number(e.sentoryTotal || 0), 0);
+  document.getElementById('expense-total-amt').textContent = fmtAmt(filteredTotal);
+}
+
+function confirmDelete(id) {
+  deleteTargetId = id;
+  document.getElementById('modal-delete').classList.remove('hidden');
+}
+document.getElementById('modal-delete-confirm-btn').addEventListener('click', () => {
+  if (!deleteTargetId) return;
+  const exps = getExpenses().filter(e => e.id !== deleteTargetId);
+  saveExpenses(exps);
+  deleteTargetId = null;
+  closeModal('modal-delete');
+  showToast('Expense deleted', 'info');
+  renderExpenseList();
+});
+
+function viewBill(id) {
+  const exp = getExpenses().find(e => e.id === id);
+  if (!exp || !exp.bill) return;
+  const body = document.getElementById('modal-bill-body');
+  body.innerHTML = '';
+  const { data, name, type } = exp.bill;
+  if (type === 'application/pdf') {
+    const iframe = document.createElement('iframe');
+    iframe.className = 'bill-preview-pdf';
+    iframe.src = data;
+    body.appendChild(iframe);
+  } else {
+    const img = document.createElement('img');
+    img.className = 'bill-preview-img';
+    img.src = data;
+    img.alt = name;
+    body.appendChild(img);
+  }
+  const nameDiv = document.createElement('div');
+  nameDiv.style.cssText = 'margin-top:0.8rem;font-size:0.8rem;color:var(--text-muted)';
+  nameDiv.textContent = '📎 ' + name;
+  body.appendChild(nameDiv);
+  document.getElementById('modal-bill').classList.remove('hidden');
+}
+
+/* ══════════════════════════════════════════════════
+   REPORTS
+══════════════════════════════════════════════════ */
+function setReportTab(tab, el) {
+  currentReportTab = tab;
+  document.querySelectorAll('.report-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+
+  const isLead = (tab === 'leads');
+
+  // Show/hide filter bars
+  document.getElementById('rpt-custom-filter').classList.toggle('hidden', isLead);
+  document.getElementById('rpt-lead-filter').classList.toggle('hidden', !isLead);
+
+  // Expense report UI
+  document.getElementById('rpt-summary-cards').style.display = isLead ? 'none' : '';
+  document.getElementById('admin-export-btns').parentElement.style.display = isLead ? 'none' : '';
+  const expTableCard = document.querySelector('#page-reports > .card');
+  if (expTableCard) expTableCard.style.display = isLead ? 'none' : '';
+
+  // Lead sections: hide until Generate clicked
+  document.getElementById('rpt-lead-summary').style.display    = 'none';
+  document.getElementById('rpt-lead-export-row').style.display = 'none';
+  document.getElementById('rpt-lead-table-card').style.display = 'none';
+
+  if (!isLead) buildReport();
+}
+
+function clearReportFilter() {
+  document.getElementById('rpt-from').value        = '';
+  document.getElementById('rpt-to').value          = '';
+  document.getElementById('rpt-head-filter').value = '';
+  buildReport();
+}
+
+function buildReport() {
+  const all  = getUserExpenses();
+  const from = document.getElementById('rpt-from').value;
+  const to   = document.getElementById('rpt-to').value;
+  const headFilter = (document.getElementById('rpt-head-filter').value || '').trim().toLowerCase();
+
+  // Filter by entry date range (date field) — if no range given, show all
+  let filtered = all;
+  if (from) filtered = filtered.filter(e => e.date && e.date >= from);
+  if (to)   filtered = filtered.filter(e => e.date && e.date <= to);
+  if (headFilter) filtered = filtered.filter(e => (e.head || '').toLowerCase().includes(headFilter));
+
+  reportExpenses = filtered;
+  const totalAmt     = filtered.reduce((s,e) => s + Number(e.amount), 0);
+  const catCount     = new Set(filtered.map(e => e.head)).size;
+  const totalSentory = filtered.reduce((s,e) => s + Number(e.sentoryTotal || 0), 0);
+
+  // Range label
+  let rangeLabel = 'All Time';
+  if (from && to)   rangeLabel = `${formatDate(from)} – ${formatDate(to)}`;
+  else if (from)    rangeLabel = `From ${formatDate(from)}`;
+  else if (to)      rangeLabel = `Up to ${formatDate(to)}`;
+
+  // Summary cards
+  const sc = document.getElementById('rpt-summary-cards');
+  sc.innerHTML = `
+    <div class="stat-card s-purple card-hover">
+      <div class="stat-icon s-purple">📋</div>
+      <div class="stat-label">Total Entries</div>
+      <div class="stat-value">${filtered.length}</div>
+      <div class="stat-trend" style="font-size:0.7rem;color:var(--text-dim);">${rangeLabel}</div>
+    </div>
+    <div class="stat-card s-green card-hover">
+      <div class="stat-icon s-green">💰</div>
+      <div class="stat-label">My Total Amount</div>
+      <div class="stat-value" style="font-size:1.5rem">${fmtAmt(totalAmt)}</div>
+    </div>
+    <div class="stat-card s-blue card-hover">
+      <div class="stat-icon s-blue">🏢</div>
+      <div class="stat-label">Total Sentory1 Expense</div>
+      <div class="stat-value" style="font-size:1.5rem">${fmtAmt(totalSentory)}</div>
+    </div>
+    <div class="stat-card s-yellow card-hover">
+      <div class="stat-icon s-yellow">🏷</div>
+      <div class="stat-label">Categories Used</div>
+      <div class="stat-value">${catCount}</div>
+    </div>
+  `;
+
+
+  // Table — always show individual rows for Custom Range
+  const thead = document.getElementById('rpt-thead-row');
+  const tbody  = document.getElementById('rpt-tbody');
+  thead.innerHTML = '<th>Entry Date</th><th>Expense Month</th><th>Expense Head</th><th>My Amount</th><th>Sentory1 Total</th><th>Paid Date</th><th>Payment</th><th>Transfer To</th><th>Remarks</th>';
+
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--text-muted)">No data found for the selected range.</td></tr>`;
+    return;
+  }
+
+  const sortedFiltered = [...filtered].sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  const sentoryTotal2  = filtered.reduce((s,e) => s + Number(e.sentoryTotal || 0), 0);
+  tbody.innerHTML = sortedFiltered.map(e => {
+    const moFmt = e.expMonth ? new Date(e.expMonth + '-01').toLocaleDateString('en-IN', {month:'short', year:'numeric'}) : '—';
+    return `<tr>
+      <td>${formatDate(e.date)}</td>
+      <td style="color:var(--text-muted)">${moFmt}</td>
+      <td><span class="badge badge-head">${e.head}</span></td>
+      <td style="font-weight:700;color:var(--accent2)">${fmtAmt(e.amount)}</td>
+      <td style="font-weight:700;color:var(--green)">${Number(e.sentoryTotal||0) > 0 ? fmtAmt(e.sentoryTotal) : '—'}</td>
+      <td style="color:var(--text-muted)">${e.paidDate ? formatDate(e.paidDate) : '—'}</td>
+      <td><span class="badge badge-${(e.mode||'').toLowerCase()}">${e.mode||'—'}</span></td>
+      <td>${e.vendor||'—'}</td>
+      <td style="color:var(--text-muted)">${e.remarks||'—'}</td>
+    </tr>`;
+  }).join('') + `<tr class="report-total-row">
+    <td colspan="3">Total</td><td>${fmtAmt(totalAmt)}</td><td>${fmtAmt(sentoryTotal2)}</td><td colspan="4">—</td>
+  </tr>`;
+}
+
+/* ══════════════════════════════════════════════════
+   EXPORT
+══════════════════════════════════════════════════ */
+function exportCSV() {
+  if (!reportExpenses.length) { showToast('No data to export', 'error'); return; }
+  const headers = ['Date','Expense Month','Expense Head','My Amount','Sentory1 Total','Paid Date','Payment Mode','Transfer To','Remarks','Created By'];
+  const rows = reportExpenses.map(e => {
+    const u = USERS.find(x => x.id === e.createdBy);
+    const moFmt = e.expMonth ? new Date(e.expMonth + '-01').toLocaleDateString('en-IN',{month:'long',year:'numeric'}) : '';
+    return [e.date, moFmt, e.head, e.amount, e.sentoryTotal||0, e.paidDate||'', e.mode, e.vendor||'', e.remarks||'', u ? u.name : 'Unknown'];
+  });
+  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], { type:'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'sentory1_expenses_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('CSV exported successfully!', 'success');
+}
+
+function exportPDF() {
+  window.print();
+}
+
+/* ── Lead Report JS ── */
+let leadReportData = [];
+
+function buildLeadReport() {
+  const all   = getLeads();
+  const from  = document.getElementById('rpt-lead-from').value;
+  const to    = document.getElementById('rpt-lead-to').value;
+  const stage = document.getElementById('rpt-lead-stage').value;
+  const mtg   = document.getElementById('rpt-lead-meeting').value;
+
+  let filtered = all;
+  if (from)  filtered = filtered.filter(l => l.date >= from);
+  if (to)    filtered = filtered.filter(l => l.date <= to);
+  if (stage) filtered = filtered.filter(l => l.stage === stage);
+  if (mtg)   filtered = filtered.filter(l => l.meeting === mtg);
+
+  leadReportData = filtered;
+
+  // Show UI sections
+  document.getElementById('rpt-lead-summary').style.display     = '';
+  document.getElementById('rpt-lead-export-row').style.display  = '';
+  document.getElementById('rpt-lead-table-card').style.display  = '';
+
+  // Stat Cards
+  const total  = filtered.length;
+  const won    = filtered.filter(l => l.stage === 'Won').length;
+  const lost   = filtered.filter(l => l.stage === 'Lost').length;
+  const active = filtered.filter(l => !['Won','Lost'].includes(l.stage)).length;
+  const withMeeting  = filtered.filter(l => l.meeting  === 'Yes').length;
+  const withProposal = filtered.filter(l => l.proposal === 'Yes').length;
+
+  document.getElementById('rpt-lead-summary').innerHTML = `
+    <div class="stat-card s-purple card-hover">
+      <div class="stat-icon s-purple">🧲</div>
+      <div class="stat-label">Total Leads</div>
+      <div class="stat-value">${total}</div>
+      <div class="stat-trend">${active} active</div>
+    </div>
+    <div class="stat-card s-green card-hover">
+      <div class="stat-icon s-green">🏆</div>
+      <div class="stat-label">Won</div>
+      <div class="stat-value">${won}</div>
+      <div class="stat-trend">${total ? Math.round(won/total*100) : 0}% win rate</div>
+    </div>
+    <div class="stat-card card-hover" style="background:linear-gradient(135deg,rgba(239,68,68,0.12),rgba(239,68,68,0.05));border-color:rgba(239,68,68,0.2);">
+      <div class="stat-icon" style="background:rgba(239,68,68,0.15);color:#fca5a5;">❌</div>
+      <div class="stat-label">Lost</div>
+      <div class="stat-value" style="color:#fca5a5;">${lost}</div>
+      <div class="stat-trend">${total ? Math.round(lost/total*100) : 0}% loss rate</div>
+    </div>
+    <div class="stat-card s-blue card-hover">
+      <div class="stat-icon s-blue">🤝</div>
+      <div class="stat-label">With Meeting</div>
+      <div class="stat-value">${withMeeting}</div>
+      <div class="stat-trend">${total ? Math.round(withMeeting/total*100) : 0}% met</div>
+    </div>
+    <div class="stat-card s-yellow card-hover">
+      <div class="stat-icon s-yellow">📄</div>
+      <div class="stat-label">Proposal Sent</div>
+      <div class="stat-value">${withProposal}</div>
+      <div class="stat-trend">${total ? Math.round(withProposal/total*100) : 0}% of leads</div>
+    </div>`;
+
+  // Table
+  const tbody = document.getElementById('rpt-lead-tbody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:2rem;color:var(--text-muted)">No leads found for the selected filters.</td></tr>`;
+    return;
+  }
+
+  const stageColors = {
+    'New':'#a5b4fc','Follow-up':'#fde68a','Proposal':'#c4b5fd',
+    'Negotiation':'#fdba74','Won':'#86efac','Lost':'#fca5a5'
+  };
+  tbody.innerHTML = filtered.map((l, i) => {
+    const stageColor = stageColors[l.stage] || '#94a3b8';
+    const moFmt = l.date ? formatDate(l.date) : '—';
+    const lmFmt = (l.meeting === 'Yes' && l.lastMeetingDate) ? formatDate(l.lastMeetingDate) : '—';
+    return `<tr>
+      <td style="color:var(--text-muted);font-size:0.8rem;">${i+1}</td>
+      <td>${moFmt}</td>
+      <td><strong>${escapeHtml(l.company||'—')}</strong></td>
+      <td>${escapeHtml(l.contactPerson||'—')}</td>
+      <td style="font-family:monospace;font-size:0.82rem;">${escapeHtml(l.contactNo||'—')}</td>
+      <td style="color:var(--text-muted);">${escapeHtml(l.contactPost||'—')}</td>
+      <td>${escapeHtml(l.city||'—')}</td>
+      <td>${l.meeting==='Yes'
+        ? '<span style="display:inline-block;padding:0.15rem 0.5rem;border-radius:999px;font-size:0.75rem;font-weight:600;background:rgba(34,197,94,0.15);color:#86efac;">Yes</span>'
+        : '<span style="display:inline-block;padding:0.15rem 0.5rem;border-radius:999px;font-size:0.75rem;font-weight:600;background:rgba(100,116,139,0.12);color:#94a3b8;">No</span>'}</td>
+      <td style="color:var(--text-muted);">${lmFmt}</td>
+      <td>${l.proposal==='Yes'
+        ? '<span style="display:inline-block;padding:0.15rem 0.5rem;border-radius:999px;font-size:0.75rem;font-weight:600;background:rgba(34,197,94,0.15);color:#86efac;">Yes</span>'
+        : '<span style="display:inline-block;padding:0.15rem 0.5rem;border-radius:999px;font-size:0.75rem;font-weight:600;background:rgba(100,116,139,0.12);color:#94a3b8;">No</span>'}</td>
+      <td><span style="display:inline-block;padding:0.15rem 0.55rem;border-radius:999px;font-size:0.75rem;font-weight:600;color:${stageColor};background:${stageColor}22;">${escapeHtml(l.stage)}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function exportLeadCSV() {
+  if (!leadReportData.length) { showToast('No lead data to export. Click Generate first.', 'error'); return; }
+  const headers = ['#','Lead Date','Company Name','Contact Person','Contact Number','Contact Post','City','Meeting','Last Meeting Date','Proposal','Lead Stage'];
+  const rows = leadReportData.map((l, i) => [
+    i + 1,
+    l.date || '',
+    l.company || '',
+    l.contactPerson || '',
+    l.contactNo || '',
+    l.contactPost || '',
+    l.city || '',
+    l.meeting || 'No',
+    (l.meeting === 'Yes' && l.lastMeetingDate) ? l.lastMeetingDate : '',
+    l.proposal || 'No',
+    l.stage || ''
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = 'sentory1_leads_' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Lead CSV exported successfully!', 'success');
+}
+
+function exportLeadPDF() {
+  if (!leadReportData.length) { showToast('No lead data to export. Click Generate first.', 'error'); return; }
+  const stageColors = {
+    'New':'#a5b4fc','Follow-up':'#fde68a','Proposal':'#c4b5fd',
+    'Negotiation':'#fdba74','Won':'#86efac','Lost':'#fca5a5'
+  };
+  const fromVal = document.getElementById('rpt-lead-from').value;
+  const toVal   = document.getElementById('rpt-lead-to').value;
+  const stageVal = document.getElementById('rpt-lead-stage').value || 'All Stages';
+  const periodStr = fromVal && toVal ? `${formatDate(fromVal)} – ${formatDate(toVal)}` : fromVal ? `From ${formatDate(fromVal)}` : toVal ? `To ${formatDate(toVal)}` : 'All Time';
+
+  const total  = leadReportData.length;
+  const won    = leadReportData.filter(l => l.stage==='Won').length;
+  const lost   = leadReportData.filter(l => l.stage==='Lost').length;
+  const active = leadReportData.filter(l => !['Won','Lost'].includes(l.stage)).length;
+  const withMeeting  = leadReportData.filter(l => l.meeting==='Yes').length;
+  const withProposal = leadReportData.filter(l => l.proposal==='Yes').length;
+
+  const tableRows = leadReportData.map((l, i) => {
+    const sc = stageColors[l.stage] || '#94a3b8';
+    return `<tr>
+      <td>${i+1}</td>
+      <td>${l.date ? formatDate(l.date) : '—'}</td>
+      <td><strong>${escapeHtml(l.company||'—')}</strong></td>
+      <td>${escapeHtml(l.contactPerson||'—')}</td>
+      <td>${escapeHtml(l.contactNo||'—')}</td>
+      <td>${escapeHtml(l.contactPost||'—')}</td>
+      <td>${escapeHtml(l.city||'—')}</td>
+      <td style="text-align:center;">${l.meeting==='Yes'?'✅':'—'}</td>
+      <td>${(l.meeting==='Yes'&&l.lastMeetingDate)?formatDate(l.lastMeetingDate):'—'}</td>
+      <td style="text-align:center;">${l.proposal==='Yes'?'✅':'—'}</td>
+      <td><span style="background:${sc}22;color:${sc};padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;">${escapeHtml(l.stage)}</span></td>
+    </tr>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <title>Sentory1 – Lead Report</title>
+    <style>
+      body { font-family: Arial, sans-serif; font-size: 11px; color: #1e293b; margin: 0; padding: 20px; }
+      h1 { font-size: 18px; color: #6366f1; margin-bottom: 4px; }
+      .meta { color: #64748b; font-size: 10px; margin-bottom: 16px; }
+      .stats { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+      .stat { background: #f1f5f9; border-radius: 8px; padding: 8px 14px; min-width: 90px; }
+      .stat-val { font-size: 20px; font-weight: 800; color: #6366f1; }
+      .stat-lbl { font-size: 9px; color: #64748b; text-transform: uppercase; letter-spacing: .05em; }
+      table { width: 100%; border-collapse: collapse; font-size: 10px; }
+      th { background: #6366f1; color: #fff; padding: 6px 8px; text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: .05em; }
+      td { padding: 5px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+      tr:nth-child(even) td { background: #f8fafc; }
+      .footer { margin-top: 14px; font-size: 9px; color: #94a3b8; text-align: right; }
+      @media print { @page { margin: 15mm; } }
+    </style></head><body>
+    <h1>🧲 Lead Management Report</h1>
+    <div class="meta">Period: ${periodStr} &nbsp;|&nbsp; Stage Filter: ${escapeHtml(stageVal)} &nbsp;|&nbsp; Generated: ${new Date().toLocaleString('en-IN')}</div>
+    <div class="stats">
+      <div class="stat"><div class="stat-val">${total}</div><div class="stat-lbl">Total</div></div>
+      <div class="stat"><div class="stat-val" style="color:#22c55e;">${won}</div><div class="stat-lbl">Won</div></div>
+      <div class="stat"><div class="stat-val" style="color:#ef4444;">${lost}</div><div class="stat-lbl">Lost</div></div>
+      <div class="stat"><div class="stat-val" style="color:#f59e0b;">${active}</div><div class="stat-lbl">Active</div></div>
+      <div class="stat"><div class="stat-val" style="color:#0ea5e9;">${withMeeting}</div><div class="stat-lbl">Meetings</div></div>
+      <div class="stat"><div class="stat-val" style="color:#8b5cf6;">${withProposal}</div><div class="stat-lbl">Proposals</div></div>
+    </div>
+    <table>
+      <thead><tr><th>#</th><th>Lead Date</th><th>Company</th><th>Contact Person</th><th>Contact No.</th><th>Post</th><th>City</th><th>Meeting</th><th>Last Meeting</th><th>Proposal</th><th>Stage</th></tr></thead>
+      <tbody>${tableRows}</tbody>
+    </table>
+    <div class="footer">Sentory1 Lead Report &nbsp;|&nbsp; ${new Date().toLocaleDateString('en-IN')}</div>
+    <script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
+  </body></html>`;
+
+  const w = window.open('', '_blank', 'width=1000,height=700');
+  if (w) { w.document.write(html); w.document.close(); }
+  else   { showToast('Allow popups to export PDF.', 'error'); }
+}
+
+/* ══════════════════════════════════════════════════
+   MODAL HELPERS
+══════════════════════════════════════════════════ */
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+}
+document.querySelectorAll('.modal-overlay').forEach(mo => {
+  mo.addEventListener('click', e => { if (e.target === mo) mo.classList.add('hidden'); });
+});
+
+/* ══════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════ */
+function showToast(msg, type='info') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  const icons = { success:'✅', error:'❌', info:'ℹ️' };
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `<span>${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0'; toast.style.transform = 'translateX(30px)'; toast.style.transition = '0.3s ease';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+/* ══════════════════════════════════════════════════
+   MY EXPENSES / TOTAL EXPENSE MODULE
+══════════════════════════════════════════════════ */
+function renderMyExpenses() {
+  const expenses = getUserExpenses();
+  const today    = todayISO();
+  const thisMonth= monthISO();
+
+  const grandTotal  = expenses.reduce((s,e) => s + Number(e.amount), 0);
+  const totalCount  = expenses.length;
+  const avgPerEntry = totalCount ? grandTotal / totalCount : 0;
+  const monthTotal  = expenses.filter(e => e.date && e.date.startsWith(thisMonth)).reduce((s,e)=>s+Number(e.amount),0);
+  const todayTotal  = expenses.filter(e => e.date === today).reduce((s,e)=>s+Number(e.amount),0);
+
+  // Banner label - admin sees all, employee sees own
+  document.getElementById('me-banner-label').textContent =
+    currentUser.role === 'admin' ? 'Total Expenses — All Users (All Time)' : 'My Total Expenses (All Time)';
+
+  document.getElementById('me-grand-total').textContent  = fmtAmt(grandTotal);
+  document.getElementById('me-total-count').textContent  = totalCount;
+  document.getElementById('me-avg-per-entry').textContent= fmtAmt(Math.round(avgPerEntry));
+  document.getElementById('me-this-month').textContent   = fmtAmt(monthTotal);
+  document.getElementById('me-today').textContent        = fmtAmt(todayTotal);
+
+  /* ── Category Breakdown (progress bars) ── */
+  const catMap = {};
+  expenses.forEach(e => {
+    if (!catMap[e.head]) catMap[e.head] = { total:0, count:0 };
+    catMap[e.head].total += Number(e.amount);
+    catMap[e.head].count++;
+  });
+  const catEntries = Object.entries(catMap).sort((a,b) => b[1].total - a[1].total);
+  const maxCat = catEntries.length ? catEntries[0][1].total : 1;
+
+  const CAT_COLORS = [
+    'linear-gradient(90deg,#6366f1,#8b5cf6)',
+    'linear-gradient(90deg,#10b981,#22d3a5)',
+    'linear-gradient(90deg,#f59e0b,#fbbf24)',
+    'linear-gradient(90deg,#ef4444,#f87171)',
+    'linear-gradient(90deg,#0ea5e9,#38bdf8)',
+    'linear-gradient(90deg,#c084fc,#e879f9)',
+    'linear-gradient(90deg,#14b8a6,#2dd4bf)',
+    'linear-gradient(90deg,#f97316,#fb923c)',
+    'linear-gradient(90deg,#ec4899,#f472b6)',
+    'linear-gradient(90deg,#84cc16,#a3e635)',
+    'linear-gradient(90deg,#64748b,#94a3b8)',
+    'linear-gradient(90deg,#a78bfa,#c4b5fd)',
+  ];
+
+  const catList = document.getElementById('me-cat-list');
+  if (!catEntries.length) {
+    catList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📂</div><h4>No expenses yet</h4></div>';
+  } else {
+    catList.innerHTML = catEntries.map(([name, data], i) => {
+      const pct = grandTotal ? ((data.total / grandTotal) * 100).toFixed(1) : 0;
+      const barPct = ((data.total / maxCat) * 100).toFixed(1);
+      return `<div class="progress-row">
+        <div class="progress-label" title="${name}">${name}</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" style="width:${barPct}%;background:${CAT_COLORS[i % CAT_COLORS.length]}"></div>
+        </div>
+        <div class="progress-amount">${fmtAmt(data.total)}</div>
+        <div class="progress-pct">${pct}%</div>
+      </div>`;
+    }).join('');
+  }
+
+  /* ── Payment Mode Breakdown ── */
+  const modeMap = {};
+  expenses.forEach(e => {
+    if (!modeMap[e.mode]) modeMap[e.mode] = { total:0, count:0 };
+    modeMap[e.mode].total += Number(e.amount);
+    modeMap[e.mode].count++;
+  });
+  const MODE_META = {
+    'Cash': { icon:'💵', color:'var(--green)',   cls:'badge-cash' },
+    'Bank': { icon:'🏦', color:'var(--blue)',    cls:'badge-bank' },
+    'UPI':  { icon:'📱', color:'var(--accent2)', cls:'badge-upi'  },
+    'Card':   { icon:'💳', color:'var(--yellow)',  cls:'badge-card'   },
+    'Cheque': { icon:'🧾', color:'var(--red)',      cls:'badge-cheque' },
+  };
+  const modeList = document.getElementById('me-mode-list');
+  const modeEntries = Object.entries(modeMap).sort((a,b) => b[1].total - a[1].total);
+  if (!modeEntries.length) {
+    modeList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💳</div><h4>No data</h4></div>';
+  } else {
+    modeList.innerHTML = modeEntries.map(([mode, data]) => {
+      const meta = MODE_META[mode] || { icon:'💰', color:'var(--text)', cls:'' };
+      const pct  = grandTotal ? ((data.total / grandTotal) * 100).toFixed(1) : 0;
+      return `<div class="mode-card">
+        <div class="mode-card-icon">${meta.icon}</div>
+        <div style="flex:1">
+          <div class="mode-card-label" style="color:${meta.color}">${mode}</div>
+          <div class="mode-card-count">${data.count} transaction${data.count!==1?'s':''} · ${pct}% of total</div>
+        </div>
+        <div class="mode-card-amt" style="color:${meta.color}">${fmtAmt(data.total)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  /* ── Month-wise Progress Bars (last 6 months) ── */
+  const monthBars = document.getElementById('me-month-bars');
+  const months6 = [];
+  for (let i=5; i>=0; i--) {
+    const d = new Date();
+    d.setDate(1);
+    d.setMonth(d.getMonth() - i);
+    months6.push(d.toISOString().slice(0,7));
+  }
+  const monthTotals = months6.map(m => ({
+    month: m,
+    total: expenses.filter(e => e.date && e.date.startsWith(m)).reduce((s,e)=>s+Number(e.amount),0),
+    count: expenses.filter(e => e.date && e.date.startsWith(m)).length,
+  }));
+  const maxMonth = Math.max(1, ...monthTotals.map(m => m.total));
+  monthBars.innerHTML = monthTotals.map((m, i) => {
+    const pct = ((m.total / maxMonth) * 100).toFixed(1);
+    const lbl = new Date(m.month + '-01').toLocaleDateString('en-IN', { month:'short', year:'numeric' });
+    return `<div class="month-progress-wrap">
+      <div class="month-label-row">
+        <span class="month-name">${lbl} <span style="color:var(--text-dim);font-weight:400">(${m.count} entries)</span></span>
+        <span class="month-amt">${fmtAmt(m.total)}</span>
+      </div>
+      <div class="progress-bar-wrap" style="height:10px">
+        <div class="progress-bar-fill" style="width:${pct}%;background:${i===5?'linear-gradient(90deg,#6366f1,#8b5cf6)':'linear-gradient(90deg,rgba(99,102,241,0.5),rgba(139,92,246,0.4))'}"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  /* ── Category Detail Table ── */
+  const tbody = document.getElementById('me-detail-tbody');
+  if (!catEntries.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">No expense data found.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = catEntries.map(([name, data], i) => {
+    const entries = expenses.filter(e => e.head === name);
+    const highest = Math.max(...entries.map(e => Number(e.amount)));
+    const avg     = data.total / data.count;
+    const pct     = grandTotal ? ((data.total / grandTotal) * 100).toFixed(1) : 0;
+    return `<tr>
+      <td><span class="badge badge-head">${name}</span></td>
+      <td>${data.count}</td>
+      <td style="font-weight:700;color:var(--accent2)">${fmtAmt(data.total)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <div style="flex:1;background:rgba(255,255,255,0.06);border-radius:20px;height:6px;overflow:hidden;min-width:60px">
+            <div style="height:100%;border-radius:20px;width:${pct}%;background:${CAT_COLORS[i%CAT_COLORS.length]}"></div>
+          </div>
+          <span style="font-size:0.78rem;font-weight:600;color:var(--text-muted)">${pct}%</span>
+        </div>
+      </td>
+      <td style="color:var(--yellow);font-weight:600">${fmtAmt(highest)}</td>
+      <td style="color:var(--text-muted)">${fmtAmt(Math.round(avg))}</td>
+    </tr>`;
+  }).join('') + `<tr class="report-total-row">
+    <td><strong>GRAND TOTAL</strong></td>
+    <td>${totalCount}</td>
+    <td>${fmtAmt(grandTotal)}</td>
+    <td>100%</td>
+    <td>—</td>
+    <td>${fmtAmt(Math.round(avgPerEntry))}</td>
+  </tr>`;
+}
+
+/* ══════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════ */
+// Clear any previously seeded dummy data on first load
+if (localStorage.getItem('sentory1_seeded')) {
+  localStorage.removeItem('sentory1_expenses');
+  localStorage.removeItem('sentory1_seeded');
+}
+
+// One-time purge of old expense data (saved before sentoryTotal fix)
+if (!localStorage.getItem('sentory1_data_v2')) {
+  localStorage.removeItem('sentory1_expenses');
+  localStorage.setItem('sentory1_data_v2', '1');
+}
+
+
+// Register Service Worker for PWA installation
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(r => console.log('Sentory1 SW registered:', r.scope))
+      .catch(e => console.warn('SW registration failed:', e));
+  });
+
+  // Automatically reload when service worker updates and takes control
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+      refreshing = true;
+      window.location.reload();
+    }
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   PROFILE PHOTO
+══════════════════════════════════════════════════ */
+
+function avatarStorageKey() {
+  return 'sentory1_avatar_' + (currentUser ? currentUser.id : '');
+}
+
+function renderSidebarAvatar() {
+  const initials   = document.getElementById('sb-avatar-initials');
+  const img        = document.getElementById('sb-avatar-img');
+  const avatarEl   = document.getElementById('sb-avatar');
+  const photo      = localStorage.getItem(avatarStorageKey());
+
+  if (photo) {
+    img.src          = photo;
+    img.style.display = 'block';
+    initials.textContent = '';
+    avatarEl.classList.add('has-photo');
+  } else {
+    img.style.display = 'none';
+    img.src           = '';
+    initials.textContent = currentUser ? currentUser.name.charAt(0).toUpperCase() : '?';
+    avatarEl.classList.remove('has-photo');
+  }
+}
+
+function uploadProfilePhoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    showToast('Please select a valid image file.', 'error');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    // Compress to max 200×200 via canvas
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const SIZE = 200;
+      canvas.width = SIZE; canvas.height = SIZE;
+      const ctx = canvas.getContext('2d');
+      // Crop to square from centre
+      const side = Math.min(img.width, img.height);
+      const sx = (img.width  - side) / 2;
+      const sy = (img.height - side) / 2;
+      ctx.drawImage(img, sx, sy, side, side, 0, 0, SIZE, SIZE);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+      localStorage.setItem(avatarStorageKey(), dataUrl);
+      renderSidebarAvatar();
+      showToast('Profile photo updated!', 'success');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  // Reset input so same file can be re-selected
+  event.target.value = '';
+}
+
+function removeProfilePhoto(event) {
+  event.stopPropagation(); // don't re-open file picker
+  localStorage.removeItem(avatarStorageKey());
+  renderSidebarAvatar();
+  showToast('Profile photo removed.', 'info');
+}
+
+/* ══════════════════════════════════════════════════
+   LEAD MANAGEMENT
+══════════════════════════════════════════════════ */
+
+/* ── DATA LAYER ── */
+function getLeads() {
+  return JSON.parse(localStorage.getItem('sentory1_leads') || '[]');
+}
+function saveLeads(data) {
+  localStorage.setItem('sentory1_leads', JSON.stringify(data));
+}
+function genLeadId() {
+  return 'lead_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+}
+
+/* ── STATE ── */
+let leadListPage = 1;
+let leadFilterState = {};
+let leadDeleteTargetId = null;
+
+/* ── STAGE BADGE COLOURS ── */
+function leadStageBadge(stage) {
+  const map = {
+    'New':         'background:rgba(99,102,241,0.15);color:#a5b4fc;',
+    'Follow-up':   'background:rgba(251,191,36,0.15);color:#fde68a;',
+    'Proposal':    'background:rgba(139,92,246,0.15);color:#c4b5fd;',
+    'Negotiation': 'background:rgba(249,115,22,0.15);color:#fdba74;',
+    'Won':         'background:rgba(34,197,94,0.15);color:#86efac;',
+    'Lost':        'background:rgba(239,68,68,0.15);color:#fca5a5;',
+  };
+  const style = map[stage] || 'background:rgba(100,116,139,0.15);color:#94a3b8;';
+  return `<span style="display:inline-block;padding:0.2rem 0.6rem;border-radius:999px;font-size:0.75rem;font-weight:600;${style}">${escapeHtml(stage)}</span>`;
+}
+
+function yesNoBadge(val) {
+  if (val === 'Yes') return `<span style="display:inline-block;padding:0.2rem 0.55rem;border-radius:999px;font-size:0.75rem;font-weight:600;background:rgba(34,197,94,0.15);color:#86efac;">Yes</span>`;
+  return `<span style="display:inline-block;padding:0.2rem 0.55rem;border-radius:999px;font-size:0.75rem;font-weight:600;background:rgba(100,116,139,0.12);color:#94a3b8;">No</span>`;
+}
+
+/* ── MODAL: Toggle Last Meeting Date ── */
+function toggleLastMeetingDate() {
+  const m = document.getElementById('ld-meeting').value;
+  const lmd = document.getElementById('ld-last-meeting');
+  lmd.disabled = (m !== 'Yes');
+  lmd.style.opacity = (m === 'Yes') ? '1' : '0.5';
+  if (m !== 'Yes') lmd.value = '';
+}
+
+/* ── OPEN / CLOSE MODAL ── */
+function openLeadModal(id) {
+  const modal = document.getElementById('modal-lead');
+  modal.classList.remove('hidden');
+  document.getElementById('lead-modal-error').classList.add('hidden');
+  document.getElementById('lead-edit-id').value = id || '';
+  document.getElementById('lead-modal-title').textContent = id ? 'Edit Lead' : 'Add Lead';
+  document.getElementById('save-lead-btn').textContent = id ? 'Update Lead' : 'Save Lead';
+
+  if (id) {
+    const lead = getLeads().find(l => l.id === id);
+    if (lead) {
+      document.getElementById('ld-date').value           = lead.date || '';
+      document.getElementById('ld-company').value        = lead.company || '';
+      document.getElementById('ld-contact-person').value = lead.contactPerson || '';
+      document.getElementById('ld-contact-no').value     = lead.contactNo || '';
+      document.getElementById('ld-contact-post').value   = lead.contactPost || '';
+      document.getElementById('ld-city').value           = lead.city || '';
+      document.getElementById('ld-meeting').value        = lead.meeting || 'No';
+      document.getElementById('ld-last-meeting').value   = lead.lastMeetingDate || '';
+      document.getElementById('ld-proposal').value       = lead.proposal || 'No';
+      document.getElementById('ld-stage').value          = lead.stage || '';
+      toggleLastMeetingDate();
+    }
+  } else {
+    ['ld-date','ld-company','ld-contact-person','ld-contact-no','ld-contact-post','ld-city','ld-last-meeting'].forEach(fid => {
+      document.getElementById(fid).value = '';
+    });
+    document.getElementById('ld-meeting').value  = 'No';
+    document.getElementById('ld-proposal').value = 'No';
+    document.getElementById('ld-stage').value    = '';
+    // Default lead date to today
+    document.getElementById('ld-date').value = todayISO();
+    toggleLastMeetingDate();
+  }
+}
+
+function closeLeadModal() {
+  document.getElementById('modal-lead').classList.add('hidden');
+}
+
+/* ── SAVE LEAD ── */
+function saveLeadFromModal() {
+  const editId   = document.getElementById('lead-edit-id').value;
+  const date     = document.getElementById('ld-date').value;
+  const company  = document.getElementById('ld-company').value.trim();
+  const person   = document.getElementById('ld-contact-person').value.trim();
+  const phone    = document.getElementById('ld-contact-no').value.trim();
+  const post     = document.getElementById('ld-contact-post').value.trim();
+  const city     = document.getElementById('ld-city').value.trim();
+  const meeting  = document.getElementById('ld-meeting').value;
+  const lastMtg  = document.getElementById('ld-last-meeting').value;
+  const proposal = document.getElementById('ld-proposal').value;
+  const stage    = document.getElementById('ld-stage').value;
+
+  const err = document.getElementById('lead-modal-error');
+  const fail = (m) => { err.textContent = m; err.classList.remove('hidden'); };
+
+  if (!date)    return fail('Lead Date is required.');
+  if (!company) return fail('Company Name is required.');
+  if (!person)  return fail('Contact Person Name is required.');
+  if (!phone)   return fail('Contact Number is required.');
+  if (!stage)   return fail('Lead Stage is required.');
+
+  const leads = getLeads();
+  if (editId) {
+    const idx = leads.findIndex(l => l.id === editId);
+    if (idx > -1) {
+      leads[idx] = { ...leads[idx], date, company, contactPerson: person, contactNo: phone, contactPost: post, city, meeting, lastMeetingDate: lastMtg, proposal, stage };
+      saveLeads(leads);
+      closeLeadModal();
+      renderLeadList();
+      showToast('Lead updated successfully.', 'success');
+    }
+  } else {
+    leads.unshift({ id: genLeadId(), date, company, contactPerson: person, contactNo: phone, contactPost: post, city, meeting, lastMeetingDate: lastMtg, proposal, stage, createdAt: new Date().toISOString(), createdBy: currentUser.id });
+    saveLeads(leads);
+    closeLeadModal();
+    renderLeadList();
+    showToast('Lead added successfully.', 'success');
+  }
+}
+
+/* ── DELETE LEAD ── */
+function confirmDeleteLead(id) {
+  leadDeleteTargetId = id;
+  document.getElementById('modal-lead-delete').classList.remove('hidden');
+}
+document.getElementById('modal-lead-delete-confirm-btn').addEventListener('click', () => {
+  if (!leadDeleteTargetId) return;
+  const leads = getLeads().filter(l => l.id !== leadDeleteTargetId);
+  saveLeads(leads);
+  leadDeleteTargetId = null;
+  closeModal('modal-lead-delete');
+  renderLeadList();
+  showToast('Lead deleted.', 'info');
+});
+
+/* ── FILTER ── */
+function applyLeadFilters() {
+  leadFilterState = {
+    company: document.getElementById('lf-company').value.trim().toLowerCase(),
+    city:    document.getElementById('lf-city').value.trim().toLowerCase(),
+    stage:   document.getElementById('lf-stage').value,
+    meeting: document.getElementById('lf-meeting').value,
+  };
+  leadListPage = 1;
+  renderLeadList();
+}
+
+function clearLeadFilters() {
+  ['lf-company','lf-city'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('lf-stage').value   = '';
+  document.getElementById('lf-meeting').value = '';
+  leadFilterState = {};
+  leadListPage = 1;
+  renderLeadList();
+}
+
+function getFilteredLeads() {
+  let data = getLeads();
+  const f = leadFilterState;
+  if (f.company) data = data.filter(l => (l.company || '').toLowerCase().includes(f.company));
+  if (f.city)    data = data.filter(l => (l.city || '').toLowerCase().includes(f.city));
+  if (f.stage)   data = data.filter(l => l.stage === f.stage);
+  if (f.meeting) data = data.filter(l => l.meeting === f.meeting);
+  return data;
+}
+
+/* ── RENDER TABLE ── */
+function renderLeadList() {
+  const all     = getFilteredLeads();
+  const total   = all.length;
+  const start   = (leadListPage - 1) * ROWS_PER_PAGE;
+  const page    = all.slice(start, start + ROWS_PER_PAGE);
+  const tbody   = document.getElementById('lead-tbody');
+
+  tbody.innerHTML = page.length ? page.map((l, i) => `
+    <tr>
+      <td style="color:var(--text-muted);font-size:0.8rem;">${start + i + 1}</td>
+      <td>${l.date ? formatDate(l.date) : '—'}</td>
+      <td><strong>${escapeHtml(l.company || '—')}</strong></td>
+      <td>${escapeHtml(l.contactPerson || '—')}</td>
+      <td style="font-family:monospace;">${escapeHtml(l.contactNo || '—')}</td>
+      <td style="color:var(--text-muted);">${escapeHtml(l.contactPost || '—')}</td>
+      <td>${escapeHtml(l.city || '—')}</td>
+      <td>${yesNoBadge(l.meeting)}</td>
+      <td style="color:var(--text-muted);">${l.meeting === 'Yes' && l.lastMeetingDate ? formatDate(l.lastMeetingDate) : '—'}</td>
+      <td>${yesNoBadge(l.proposal)}</td>
+      <td>${leadStageBadge(l.stage)}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="openLeadModal('${escapeJs(l.id)}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmDeleteLead('${escapeJs(l.id)}')">Delete</button>
+      </td>
+    </tr>`).join('') :
+    `<tr><td colspan="12" style="text-align:center;padding:2.5rem;color:var(--text-muted);">No leads found. Add your first lead!</td></tr>`;
+
+  // Pagination
+  const totalPages = Math.ceil(total / ROWS_PER_PAGE) || 1;
+  document.getElementById('lead-pagination-info').textContent =
+    total ? `Showing ${start + 1}–${Math.min(start + ROWS_PER_PAGE, total)} of ${total} lead${total !== 1 ? 's' : ''}` : '';
+  const btns = document.getElementById('lead-pagination-btns');
+  let html = '';
+  for (let p = 1; p <= totalPages; p++) {
+    html += `<button class="page-btn ${p === leadListPage ? 'active' : ''}" onclick="goLeadPage(${p})">${p}</button>`;
+  }
+  btns.innerHTML = html;
+
+  // Stat cards
+  renderLeadStats(getLeads());
+}
+
+function goLeadPage(p) {
+  leadListPage = p;
+  renderLeadList();
+}
+
+/* ── STAT CARDS ── */
+function renderLeadStats(leads) {
+  const won       = leads.filter(l => l.stage === 'Won').length;
+  const lost      = leads.filter(l => l.stage === 'Lost').length;
+  const active    = leads.filter(l => !['Won','Lost'].includes(l.stage)).length;
+  const grid = document.getElementById('lead-stat-grid');
+  if (!grid) return;
+  grid.innerHTML = `
+    <div class="stat-card s-purple card-hover">
+      <div class="stat-icon s-purple">🧲</div>
+      <div class="stat-label">Total Leads</div>
+      <div class="stat-value">${leads.length}</div>
+      <div class="stat-trend">${active} active</div>
+    </div>
+    <div class="stat-card s-green card-hover">
+      <div class="stat-icon s-green">🏆</div>
+      <div class="stat-label">Won</div>
+      <div class="stat-value">${won}</div>
+      <div class="stat-trend">${leads.length ? Math.round(won/leads.length*100) : 0}% win rate</div>
+    </div>
+    <div class="stat-card card-hover" style="background:linear-gradient(135deg,rgba(239,68,68,0.12),rgba(239,68,68,0.05));border-color:rgba(239,68,68,0.2);">
+      <div class="stat-icon" style="background:rgba(239,68,68,0.15);color:#fca5a5;">❌</div>
+      <div class="stat-label">Lost</div>
+      <div class="stat-value" style="color:#fca5a5;">${lost}</div>
+      <div class="stat-trend">${leads.length ? Math.round(lost/leads.length*100) : 0}% loss rate</div>
+    </div>`;
+}
+
+/* ══════════════════════════════════════════════════
+   EARNING MANAGEMENT
+══════════════════════════════════════════════════ */
+
+/* ── DATA LAYER ── */
+function getEarnings() {
+  try {
+    return JSON.parse(localStorage.getItem('sentory1_earnings') || '[]');
+  } catch (e) {
+    console.error("Error parsing earnings:", e);
+    return [];
+  }
+}
+function saveEarnings(data) {
+  try {
+    localStorage.setItem('sentory1_earnings', JSON.stringify(data));
+  } catch (e) {
+    console.error("Error saving earnings:", e);
+    showToast('Failed to save data. Storage might be full.', 'error');
+  }
+}
+function genEarningId() {
+  return 'earning_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+}
+
+/* ── STATE ── */
+let earningListPage = 1;
+let earningFilterState = {};
+let earningDeleteTargetId = null;
+
+/* ── STAGE BADGE COLOURS ── */
+function earningStatusBadge(status) {
+  const style = status === 'Receive'
+    ? 'background:rgba(34,197,94,0.15);color:#86efac;border:1px solid rgba(34,197,94,0.25);'
+    : 'background:rgba(251,191,36,0.15);color:#fde68a;border:1px solid rgba(251,191,36,0.25);';
+  return `<span class="badge" style="${style}">${escapeHtml(status)}</span>`;
+}
+
+function earningModeBadge(mode) {
+  if (!mode) return '<span style="color:var(--text-dim);">—</span>';
+  const cls = 'badge-' + mode.toLowerCase();
+  return `<span class="badge ${cls}">${escapeHtml(mode)}</span>`;
+}
+
+/* ── FORM HELPERS ── */
+function toggleEarningReceivedFields() {
+  const status = document.getElementById('er-status').value;
+  const rDate = document.getElementById('er-received-date');
+  const rMode = document.getElementById('er-received-mode');
+  const isReceived = (status === 'Receive');
+  
+  rDate.disabled = !isReceived;
+  rMode.disabled = !isReceived;
+  
+  rDate.style.opacity = isReceived ? '1' : '0.5';
+  rMode.style.opacity = isReceived ? '1' : '0.5';
+  
+  if (!isReceived) {
+    rDate.value = '';
+    rMode.value = '';
+  } else if (!rDate.value) {
+    rDate.value = todayISO();
+  }
+}
+
+function calcEarningBalance() {
+  const fundVal = document.getElementById('er-fund').value;
+  const holdVal = document.getElementById('er-hold').value;
+  if (fundVal === '') {
+    document.getElementById('er-balance').value = '';
+    document.getElementById('er-share').value = '';
+    return;
+  }
+  const fund = parseFloat(fundVal) || 0;
+  const hold = parseFloat(holdVal) || 0;
+  const bal  = parseFloat((fund - hold).toFixed(2));
+  const finalBal = bal >= 0 ? bal : 0;
+  document.getElementById('er-balance').value = finalBal;
+  
+  // Auto-calculate My Earning Share Fund: 15% of Total Earning Balance
+  const share = parseFloat((finalBal * 0.15).toFixed(2));
+  document.getElementById('er-share').value = share;
+}
+
+/* ── OPEN / CLOSE MODAL ── */
+function openEarningModal(id) {
+  const modal = document.getElementById('modal-earning');
+  modal.classList.remove('hidden');
+  document.getElementById('earning-modal-error').classList.add('hidden');
+  document.getElementById('earning-edit-id').value = id || '';
+  document.getElementById('earning-modal-title').textContent = id ? 'Edit Earning' : 'Add Earning';
+  document.getElementById('save-earning-btn').textContent = id ? 'Update Earning' : 'Save Earning';
+
+  if (id) {
+    const earn = getEarnings().find(e => e.id === id);
+    if (earn) {
+      document.getElementById('er-date').value          = earn.date || '';
+      document.getElementById('er-fund').value          = earn.fund || 0;
+      document.getElementById('er-hold').value          = earn.hold || 0;
+      document.getElementById('er-balance').value       = (earn.fund - earn.hold) || 0;
+      document.getElementById('er-share').value         = earn.share || 0;
+      document.getElementById('er-status').value        = earn.status || 'Pending';
+      document.getElementById('er-received-date').value = earn.receivedDate || '';
+      document.getElementById('er-received-mode').value = earn.receivedMode || '';
+      toggleEarningReceivedFields();
+    }
+  } else {
+    ['er-date','er-fund','er-hold','er-balance','er-share','er-received-date'].forEach(fid => {
+      document.getElementById(fid).value = '';
+    });
+    document.getElementById('er-status').value = 'Pending';
+    document.getElementById('er-received-mode').value = '';
+    document.getElementById('er-date').value = todayISO();
+    toggleEarningReceivedFields();
+  }
+}
+
+function closeEarningModal() {
+  document.getElementById('modal-earning').classList.add('hidden');
+}
+
+/* ── SAVE EARNING ── */
+function saveEarningFromModal() {
+  try {
+    const editId   = document.getElementById('earning-edit-id').value;
+    const date     = document.getElementById('er-date').value;
+    const fundVal  = document.getElementById('er-fund').value;
+    const holdVal  = document.getElementById('er-hold').value;
+    const shareVal = document.getElementById('er-share').value;
+    const status   = document.getElementById('er-status').value;
+    const rDate    = document.getElementById('er-received-date').value;
+    const rMode    = document.getElementById('er-received-mode').value;
+
+    const err = document.getElementById('earning-modal-error');
+    const fail = (m) => { err.textContent = m; err.classList.remove('hidden'); };
+
+    if (!date)     return fail('Earning Date is required.');
+    if (fundVal==='')  return fail('Total Earning Fund is required.');
+    if (holdVal==='')  return fail('Hold amount is required.');
+    if (shareVal==='') return fail('My Earning Share Fund is required.');
+    
+    const fund  = parseFloat(fundVal);
+    const hold  = parseFloat(holdVal);
+    const share = parseFloat(shareVal);
+    
+    if (fund < 0)  return fail('Total Earning Fund cannot be negative.');
+    if (hold < 0)  return fail('Hold in bank cannot be negative.');
+    if (hold > fund) return fail('Hold in bank cannot be larger than the Earning Fund.');
+    if (share < 0) return fail('My Earning Share Fund cannot be negative.');
+    
+    if (status === 'Receive') {
+      if (!rDate) return fail('Received Date is required when status is Receive.');
+      if (!rMode) return fail('Received Mode is required when status is Receive.');
+    }
+
+    const earnings = getEarnings();
+    if (editId) {
+      const idx = earnings.findIndex(e => e.id === editId);
+      if (idx > -1) {
+        earnings[idx] = { 
+          ...earnings[idx], 
+          date, 
+          fund, 
+          hold, 
+          share, 
+          status, 
+          receivedDate: status === 'Receive' ? rDate : '', 
+          receivedMode: status === 'Receive' ? rMode : '' 
+        };
+        saveEarnings(earnings);
+        closeEarningModal();
+        renderEarningList();
+        showToast('Earning record updated.', 'success');
+      }
+    } else {
+      earnings.unshift({ 
+        id: genEarningId(), 
+        date, 
+        fund, 
+        hold, 
+        share, 
+        status, 
+        receivedDate: status === 'Receive' ? rDate : '', 
+        receivedMode: status === 'Receive' ? rMode : '', 
+        createdAt: new Date().toISOString(), 
+        createdBy: currentUser ? currentUser.id : 'unknown' 
+      });
+      saveEarnings(earnings);
+      closeEarningModal();
+      renderEarningList();
+      showToast('Earning record added.', 'success');
+    }
+  } catch (error) {
+    alert("Runtime Error in saveEarningFromModal: " + error.message + "\nStack: " + error.stack);
+    console.error("Save Earning Error:", error);
+  }
+}
+
+/* ── DELETE EARNING ── */
+function confirmDeleteEarning(id) {
+  earningDeleteTargetId = id;
+  document.getElementById('modal-earning-delete').classList.remove('hidden');
+}
+
+// Bind confirmation button for earning delete
+document.getElementById('modal-earning-delete-confirm-btn').addEventListener('click', () => {
+  if (!earningDeleteTargetId) return;
+  const earnings = getEarnings().filter(e => e.id !== earningDeleteTargetId);
+  saveEarnings(earnings);
+  earningDeleteTargetId = null;
+  closeModal('modal-earning-delete');
+  renderEarningList();
+  showToast('Earning record deleted.', 'info');
+});
+
+/* ── FILTER ── */
+function applyEarningFilters() {
+  earningFilterState = {
+    from:   document.getElementById('ef-from').value,
+    to:     document.getElementById('ef-to').value,
+    status: document.getElementById('ef-status').value,
+    mode:   document.getElementById('ef-mode').value,
+  };
+  earningListPage = 1;
+  renderEarningList();
+}
+
+function clearEarningFilters() {
+  document.getElementById('ef-from').value = '';
+  document.getElementById('ef-to').value = '';
+  document.getElementById('ef-status').value = '';
+  document.getElementById('ef-mode').value = '';
+  earningFilterState = {};
+  earningListPage = 1;
+  renderEarningList();
+}
+
+function getUserEarnings() {
+  const all = getEarnings();
+  const role = currentUser ? currentUser.role : 'employee';
+  const id = currentUser ? currentUser.id : '';
+  if (role === 'admin') return all;
+  return all.filter(e => e.createdBy === id);
+}
+
+function getFilteredEarnings() {
+  let data = getUserEarnings().sort((a,b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || '').localeCompare(a.createdAt || ''));
+  const f = earningFilterState;
+  if (f.from)   data = data.filter(e => e.date >= f.from);
+  if (f.to)     data = data.filter(e => e.date <= f.to);
+  if (f.status) data = data.filter(e => e.status === f.status);
+  if (f.mode)   data = data.filter(e => e.receivedMode === f.mode);
+  return data;
+}
+
+/* ── RENDER TABLE & STATS ── */
+function renderEarningList() {
+  try {
+    const isAdmin = currentUser ? currentUser.role === 'admin' : false;
+    document.getElementById('col-earning-added-by').style.display = isAdmin ? '' : 'none';
+
+    const allFiltered = getFilteredEarnings();
+    const total = allFiltered.length;
+    const start = (earningListPage - 1) * ROWS_PER_PAGE;
+    const page  = allFiltered.slice(start, start + ROWS_PER_PAGE);
+    const tbody = document.getElementById('earning-tbody');
+
+    tbody.innerHTML = page.length ? page.map((e, i) => {
+      const u = USERS.find(x => x.id === e.createdBy);
+      const balance = e.fund - e.hold;
+      const rDateFmt = e.receivedDate ? formatDate(e.receivedDate) : '—';
+      const rModeFmt = earningModeBadge(e.receivedMode);
+      
+      let actions = isAdmin
+        ? `<button class="btn btn-ghost btn-sm" onclick="openEarningModal('${escapeJs(e.id)}')">Edit</button>
+           <button class="btn btn-danger btn-sm" onclick="confirmDeleteEarning('${escapeJs(e.id)}')">Delete</button>`
+        : ((currentUser && e.createdBy === currentUser.id)
+            ? `<button class="btn btn-ghost btn-sm" onclick="openEarningModal('${escapeJs(e.id)}')">Edit</button>
+               <button class="btn btn-danger btn-sm" onclick="confirmDeleteEarning('${escapeJs(e.id)}')">Delete</button>`
+            : '<span style="color:var(--text-dim);font-size:0.78rem;">—</span>');
+
+      return `<tr>
+        <td style="color:var(--text-muted);font-size:0.8rem;">${start + i + 1}</td>
+        <td>${formatDate(e.date)}</td>
+        <td style="font-weight:700;color:var(--accent2)">${fmtAmt(e.fund)}</td>
+        <td style="color:var(--yellow);font-weight:600">${fmtAmt(e.hold)}</td>
+        <td style="font-weight:700;color:var(--green)">${fmtAmt(balance)}</td>
+        <td style="font-weight:700;color:var(--blue)">${fmtAmt(e.share)}</td>
+        <td>${earningStatusBadge(e.status)}</td>
+        <td>${rDateFmt}</td>
+        <td>${rModeFmt}</td>
+        <td style="${isAdmin ? '' : 'display:none'};color:var(--text-muted)">${u ? u.name : 'Unknown'}</td>
+        <td>${actions}</td>
+      </tr>`;
+    }).join('') :
+    `<tr><td colspan="${isAdmin ? 11 : 10}" style="text-align:center;padding:2.5rem;color:var(--text-muted);">No earning records found. Add your first earning!</td></tr>`;
+
+    // Pagination
+    const totalPages = Math.ceil(total / ROWS_PER_PAGE) || 1;
+    document.getElementById('earning-pagination-info').textContent =
+      total ? `Showing ${start + 1}–${Math.min(start + ROWS_PER_PAGE, total)} of ${total} record${total !== 1 ? 's' : ''}` : '';
+    const btns = document.getElementById('earning-pagination-btns');
+    let html = '';
+    for (let p = 1; p <= totalPages; p++) {
+      html += `<button class="page-btn ${p === earningListPage ? 'active' : ''}" onclick="goEarningPage(${p})">${p}</button>`;
+    }
+    btns.innerHTML = html;
+
+
+  } catch (error) {
+    alert("Runtime Error in renderEarningList: " + error.message + "\nStack: " + error.stack);
+    console.error("Render Earning List Error:", error);
+  }
+}
+
+function goEarningPage(p) {
+  earningListPage = p;
+  renderEarningList();
+}
+
+/* ── EXPORT CSV ── */
+function exportEarningCSV() {
+  const filtered = getFilteredEarnings();
+  if (!filtered.length) { showToast('No earning data to export', 'error'); return; }
+  const headers = ['Date', 'Total Earning Fund', 'Hold in Sentory1 Bank', 'Total Earning Balance', 'My Earning Share Fund', 'Status', 'Received Date', 'Received Mode', 'Created By'];
+  const rows = filtered.map(e => {
+    const u = USERS.find(x => x.id === e.createdBy);
+    return [
+      e.date,
+      e.fund,
+      e.hold,
+      e.fund - e.hold,
+      e.share,
+      e.status,
+      e.receivedDate || '',
+      e.receivedMode || '',
+      u ? u.name : 'Unknown'
+    ];
+  });
+  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = 'sentory1_earnings_' + new Date().toISOString().slice(0, 10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Earning CSV exported successfully!', 'success');
+}
+
+/* ── EXPORT PDF / PRINT ── */
+function exportEarningPDF() {
+  const data = getFilteredEarnings();
+  if (!data.length) { showToast('No earning data to export.', 'error'); return; }
+  
+  const fromVal = document.getElementById('ef-from').value;
+  const toVal   = document.getElementById('ef-to').value;
+  const periodStr = fromVal && toVal ? `${formatDate(fromVal)} – ${formatDate(toVal)}` : fromVal ? `From ${formatDate(fromVal)}` : toVal ? `To ${formatDate(toVal)}` : 'All Time';
+
+  const totalFund  = data.reduce((s, e) => s + Number(e.fund || 0), 0);
+  const totalHold  = data.reduce((s, e) => s + Number(e.hold || 0), 0);
+  const totalShare = data.reduce((s, e) => s + Number(e.share || 0), 0);
+  const totalBal   = totalFund - totalHold;
+
+  const tableRows = data.map((e, i) => {
+    return `<tr>
+      <td>${i+1}</td>
+      <td>${e.date ? formatDate(e.date) : '—'}</td>
+      <td style="text-align:right;">${fmtAmt(e.fund)}</td>
+      <td style="text-align:right;">${fmtAmt(e.hold)}</td>
+      <td style="text-align:right;">${fmtAmt(e.fund - e.hold)}</td>
+      <td style="text-align:right;">${fmtAmt(e.share)}</td>
+      <td style="text-align:center;">${escapeHtml(e.status)}</td>
+      <td>${e.receivedDate ? formatDate(e.receivedDate) : '—'}</td>
+      <td>${e.receivedMode || '—'}</td>
+    </tr>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <title>Sentory1 – Earning Report</title>
+    <style>
+      body { font-family: Arial, sans-serif; font-size: 11px; color: #1e293b; margin: 0; padding: 20px; }
+      h1 { font-size: 18px; color: #6366f1; margin-bottom: 4px; }
+      .meta { color: #64748b; font-size: 10px; margin-bottom: 16px; }
+      .stats { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+      .stat { background: #f1f5f9; border-radius: 8px; padding: 8px 14px; min-width: 100px; }
+      .stat-val { font-size: 16px; font-weight: 800; color: #6366f1; }
+      .stat-lbl { font-size: 9px; color: #64748b; text-transform: uppercase; letter-spacing: .05em; }
+      table { width: 100%; border-collapse: collapse; font-size: 10px; }
+      th { background: #6366f1; color: #fff; padding: 6px 8px; text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: .05em; }
+      td { padding: 5px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+      tr:nth-child(even) td { background: #f8fafc; }
+      .footer { margin-top: 14px; font-size: 9px; color: #94a3b8; text-align: right; }
+      @media print { @page { margin: 15mm; } }
+    </style></head><body>
+    <h1>💰 Earning &amp; Share Fund Report</h1>
+    <div class="meta">Period: ${periodStr} &nbsp;|&nbsp; Generated: ${new Date().toLocaleString('en-IN')}</div>
+    <div class="stats">
+      <div class="stat"><div class="stat-val">${fmtAmt(totalFund)}</div><div class="stat-lbl">Total Fund</div></div>
+      <div class="stat"><div class="stat-val" style="color:#f59e0b;">${fmtAmt(totalHold)}</div><div class="stat-lbl">Total Hold</div></div>
+      <div class="stat"><div class="stat-val" style="color:#22c55e;">${fmtAmt(totalBal)}</div><div class="stat-lbl">Total Balance</div></div>
+      <div class="stat"><div class="stat-val" style="color:#0ea5e9;">${fmtAmt(totalShare)}</div><div class="stat-lbl">Share Fund</div></div>
+    </div>
+    <table>
+      <thead><tr><th>#</th><th>Date</th><th>Earning Fund</th><th>Hold In Bank</th><th>Earning Balance</th><th>Share Fund</th><th>Status</th><th>Received Date</th><th>Received Mode</th></tr></thead>
+      <tbody>${tableRows}</tbody>
+    </table>
+    <div class="footer">Sentory1 Earning Report &nbsp;|&nbsp; ${new Date().toLocaleDateString('en-IN')}</div>
+    <script>window.onload=function(){window.print();window.onafterprint=function(){window.close();};};<\/script>
+  </body></html>`;
+
+  const w = window.open('', '_blank', 'width=1000,height=700');
+  if (w) { w.document.write(html); w.document.close(); }
+  else   { showToast('Allow popups to export PDF.', 'error'); }
+}
+
+/* ══════════════════════════════════════════════════
+   CLEAR ALL DATA
+══════════════════════════════════════════════════ */
+function renderClearDataSummary() {
+  const expenses = JSON.parse(localStorage.getItem('sentory1_expenses') || '[]');
+  const leads    = JSON.parse(localStorage.getItem('sentory1_leads')    || '[]');
+  const earnings = JSON.parse(localStorage.getItem('sentory1_earnings') || '[]');
+  // Count avatar keys
+  const avatarCount = Object.keys(localStorage).filter(k => k.startsWith('sentory1_avatar_')).length;
+
+  const el = document.getElementById('clear-data-summary');
+  if (!el) return;
+  el.innerHTML = `
+    <div class="stat-card s-purple card-hover">
+      <div class="stat-icon s-purple">💸</div>
+      <div class="stat-label">Expense Entries</div>
+      <div class="stat-value">${expenses.length}</div>
+      <div class="stat-trend">across all users</div>
+    </div>
+    <div class="stat-card s-blue card-hover">
+      <div class="stat-icon s-blue">🧲</div>
+      <div class="stat-label">Lead Records</div>
+      <div class="stat-value">${leads.length}</div>
+      <div class="stat-trend">in Lead Management</div>
+    </div>
+    <div class="stat-card s-green card-hover">
+      <div class="stat-icon s-green">💰</div>
+      <div class="stat-label">Earning Records</div>
+      <div class="stat-value">${earnings.length}</div>
+      <div class="stat-trend">in Earning Management</div>
+    </div>
+    <div class="stat-card s-yellow card-hover">
+      <div class="stat-icon s-yellow">🖼</div>
+      <div class="stat-label">Profile Photos</div>
+      <div class="stat-value">${avatarCount}</div>
+      <div class="stat-trend">stored locally</div>
+    </div>`;
+}
+
+function clearAllData() {
+  // Remove all sentory1 data keys but preserve user accounts
+  const keysToRemove = Object.keys(localStorage).filter(k =>
+    k === 'sentory1_expenses' ||
+    k === 'sentory1_leads' ||
+    k === 'sentory1_earnings' ||
+    k.startsWith('sentory1_avatar_')
+  );
+  keysToRemove.forEach(k => localStorage.removeItem(k));
+
+  // Reset confirm input and disable button
+  const inp = document.getElementById('clear-confirm-input');
+  const btn = document.getElementById('clear-data-btn');
+  if (inp) inp.value = '';
+  if (btn) btn.disabled = true;
+
+  // Refresh summary
+  renderClearDataSummary();
+
+  showToast(`✅ Cleared ${keysToRemove.length} data item(s). All expenses, leads, earnings and photos have been removed.`, 'success');
+
+  // Navigate to dashboard after short delay
+  setTimeout(() => navigateTo('dashboard'), 1500);
+}
+
+/* ══════════════════════════════════════════════════
+   FULL BACKUP & RESTORE
+══════════════════════════════════════════════════ */
+function exportFullBackup() {
+  try {
+    const backupData = {
+      version: '1.0',
+      exportedAt: new Date().toISOString(),
+      app: 'Sentory1 Expense Management',
+      data: {}
+    };
+
+    // Gather all local storage keys starting with sentory1_
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('sentory1_'));
+    keys.forEach(key => {
+      try {
+        backupData.data[key] = JSON.parse(localStorage.getItem(key));
+      } catch (e) {
+        backupData.data[key] = localStorage.getItem(key);
+      }
+    });
+
+    const jsonStr = JSON.stringify(backupData, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sentory1_full_backup_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    showToast('Full JSON backup exported successfully!', 'success');
+  } catch (err) {
+    showToast('Failed to export backup: ' + err.message, 'error');
+  }
+}
+
+function importFullBackup(evt) {
+  const file = evt.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const backup = JSON.parse(e.target.result);
+      if (!backup || !backup.data) {
+        showToast('Invalid backup file format.', 'error');
+        return;
+      }
+
+      // Restore all keys to localStorage
+      Object.keys(backup.data).forEach(key => {
+        const val = backup.data[key];
+        const strVal = (typeof val === 'string') ? val : JSON.stringify(val);
+        localStorage.setItem(key, strVal);
+      });
+
+      showToast('Backup restored successfully! Reloading view...', 'success');
+      setTimeout(() => {
+        location.reload();
+      }, 1200);
+    } catch (err) {
+      showToast('Error restoring backup: ' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file);
+}
+
+initAuth();
+</script>
+
+</body>
+</html>

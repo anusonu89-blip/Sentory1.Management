@@ -1,0 +1,70 @@
+{
+  "name": "sentory1",
+  "version": "1.0.0",
+  "description": "Sentory1 – Expense Management System",
+  "author": "Sentory1",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "dependencies": {
+    "electron-store": "^8.2.0"
+  },
+  "build": {
+    "appId": "com.sentory1.expense-management",
+    "productName": "Sentory1",
+    "copyright": "Copyright © 2025 Sentory1",
+    "directories": {
+      "output": "build"
+    },
+    "files": [
+      "index.html",
+      "main.js",
+      "preload.js",
+      "manifest.json",
+      "sw.js",
+      "icon-512.png",
+      "icon.ico",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "icon.ico",
+      "signingHashAlgorithms": null,
+      "sign": false
+    },
+    "nsis": {
+      "oneClick": true,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Sentory1",
+      "installerIcon": "icon.ico",
+      "uninstallerIcon": "icon.ico",
+      "installerHeaderIcon": "icon.ico",
+      "deleteAppDataOnUninstall": false
+    }
+  },
+  "allowScripts": {
+    "electron@33.4.11": true
+  }
+}
