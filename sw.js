@@ -1,4 +1,4 @@
-const CACHE = 'sentory1-v17';
+const CACHE = 'sentory1-v18';
 const ASSETS = [
   './',
   './index.html',
