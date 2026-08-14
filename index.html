@@ -1436,7 +1436,7 @@
               <tr>
                 <th>#</th><th>Lead Date</th><th>Company</th><th>Contact Person</th>
                 <th>Contact No.</th><th>Post</th><th>City</th>
-                <th>Meeting</th><th>Last Meeting</th><th>Proposal</th><th>Stage</th>
+                <th>Meeting</th><th>Last Meeting</th><th>Proposal</th><th>POC</th><th>POC Date</th><th>Stage</th>
               </tr>
             </thead>
             <tbody id="rpt-lead-tbody"></tbody>
@@ -1603,6 +1603,8 @@
                 <th>Meeting</th>
                 <th>Last Meeting</th>
                 <th>Proposal</th>
+                <th>POC</th>
+                <th>POC Date</th>
                 <th>Stage</th>
                 <th>Action</th>
               </tr>
@@ -2056,6 +2058,21 @@
             <option value="No">No</option>
             <option value="Yes">Yes</option>
           </select>
+        </div>
+
+        <!-- POC -->
+        <div class="form-group">
+          <label class="form-label" for="ld-poc">POC (Yes/No)</label>
+          <select id="ld-poc" class="form-control" onchange="togglePocDate()">
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+
+        <!-- Date of POC -->
+        <div class="form-group hidden" id="ld-poc-date-group">
+          <label class="form-label" for="ld-poc-date">Date of POC</label>
+          <input id="ld-poc-date" class="form-control" type="date" />
         </div>
 
         <!-- 10. Lead Stage -->
@@ -3187,7 +3204,7 @@ function buildLeadReport() {
   // Table
   const tbody = document.getElementById('rpt-lead-tbody');
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:2rem;color:var(--text-muted)">No leads found for the selected filters.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="13" style="text-align:center;padding:2rem;color:var(--text-muted)">No leads found for the selected filters.</td></tr>`;
     return;
   }
 
@@ -3199,6 +3216,7 @@ function buildLeadReport() {
     const stageColor = stageColors[l.stage] || '#94a3b8';
     const moFmt = l.date ? formatDate(l.date) : '—';
     const lmFmt = (l.meeting === 'Yes' && l.lastMeetingDate) ? formatDate(l.lastMeetingDate) : '—';
+    const lpFmt = (l.poc === 'Yes' && l.pocDate) ? formatDate(l.pocDate) : '—';
     return `<tr>
       <td style="color:var(--text-muted);font-size:0.8rem;">${i+1}</td>
       <td>${moFmt}</td>
@@ -3214,6 +3232,10 @@ function buildLeadReport() {
       <td>${l.proposal==='Yes'
         ? '<span style="display:inline-block;padding:0.15rem 0.5rem;border-radius:999px;font-size:0.75rem;font-weight:600;background:rgba(34,197,94,0.15);color:#86efac;">Yes</span>'
         : '<span style="display:inline-block;padding:0.15rem 0.5rem;border-radius:999px;font-size:0.75rem;font-weight:600;background:rgba(100,116,139,0.12);color:#94a3b8;">No</span>'}</td>
+      <td>${(l.poc || 'No')==='Yes'
+        ? '<span style="display:inline-block;padding:0.15rem 0.5rem;border-radius:999px;font-size:0.75rem;font-weight:600;background:rgba(34,197,94,0.15);color:#86efac;">Yes</span>'
+        : '<span style="display:inline-block;padding:0.15rem 0.5rem;border-radius:999px;font-size:0.75rem;font-weight:600;background:rgba(100,116,139,0.12);color:#94a3b8;">No</span>'}</td>
+      <td style="color:var(--text-muted);">${lpFmt}</td>
       <td><span style="display:inline-block;padding:0.15rem 0.55rem;border-radius:999px;font-size:0.75rem;font-weight:600;color:${stageColor};background:${stageColor}22;">${escapeHtml(l.stage)}</span></td>
     </tr>`;
   }).join('');
@@ -3221,7 +3243,7 @@ function buildLeadReport() {
 
 function exportLeadCSV() {
   if (!leadReportData.length) { showToast('No lead data to export. Click Generate first.', 'error'); return; }
-  const headers = ['#','Lead Date','Company Name','Contact Person','Contact Number','Contact Post','City','Meeting','Last Meeting Date','Proposal','Lead Stage'];
+  const headers = ['#','Lead Date','Company Name','Contact Person','Contact Number','Contact Post','City','Meeting','Last Meeting Date','Proposal','POC','POC Date','Lead Stage'];
   const rows = leadReportData.map((l, i) => [
     i + 1,
     l.date || '',
@@ -3233,6 +3255,8 @@ function exportLeadCSV() {
     l.meeting || 'No',
     (l.meeting === 'Yes' && l.lastMeetingDate) ? l.lastMeetingDate : '',
     l.proposal || 'No',
+    l.poc || 'No',
+    (l.poc === 'Yes' && l.pocDate) ? l.pocDate : '',
     l.stage || ''
   ]);
   const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
@@ -3277,6 +3301,8 @@ function exportLeadPDF() {
       <td style="text-align:center;">${l.meeting==='Yes'?'✅':'—'}</td>
       <td>${(l.meeting==='Yes'&&l.lastMeetingDate)?formatDate(l.lastMeetingDate):'—'}</td>
       <td style="text-align:center;">${l.proposal==='Yes'?'✅':'—'}</td>
+      <td style="text-align:center;">${l.poc==='Yes'?'✅':'—'}</td>
+      <td>${(l.poc==='Yes'&&l.pocDate)?formatDate(l.pocDate):'—'}</td>
       <td><span style="background:${sc}22;color:${sc};padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;">${escapeHtml(l.stage)}</span></td>
     </tr>`;
   }).join('');
@@ -3309,7 +3335,7 @@ function exportLeadPDF() {
       <div class="stat"><div class="stat-val" style="color:#8b5cf6;">${withProposal}</div><div class="stat-lbl">Proposals</div></div>
     </div>
     <table>
-      <thead><tr><th>#</th><th>Lead Date</th><th>Company</th><th>Contact Person</th><th>Contact No.</th><th>Post</th><th>City</th><th>Meeting</th><th>Last Meeting</th><th>Proposal</th><th>Stage</th></tr></thead>
+      <thead><tr><th>#</th><th>Lead Date</th><th>Company</th><th>Contact Person</th><th>Contact No.</th><th>Post</th><th>City</th><th>Meeting</th><th>Last Meeting</th><th>Proposal</th><th>POC</th><th>POC Date</th><th>Stage</th></tr></thead>
       <tbody>${tableRows}</tbody>
     </table>
     <div class="footer">Sentory1 Lead Report &nbsp;|&nbsp; ${new Date().toLocaleDateString('en-IN')}</div>
@@ -3662,6 +3688,19 @@ function toggleLastMeetingDate() {
   if (m !== 'Yes') lmd.value = '';
 }
 
+/* ── MODAL: Toggle POC Date ── */
+function togglePocDate() {
+  const poc = document.getElementById('ld-poc').value;
+  const pocDateGroup = document.getElementById('ld-poc-date-group');
+  const pocDateInput = document.getElementById('ld-poc-date');
+  if (poc === 'Yes') {
+    pocDateGroup.classList.remove('hidden');
+  } else {
+    pocDateGroup.classList.add('hidden');
+    pocDateInput.value = '';
+  }
+}
+
 /* ── OPEN / CLOSE MODAL ── */
 function openLeadModal(id) {
   const modal = document.getElementById('modal-lead');
@@ -3683,19 +3722,24 @@ function openLeadModal(id) {
       document.getElementById('ld-meeting').value        = lead.meeting || 'No';
       document.getElementById('ld-last-meeting').value   = lead.lastMeetingDate || '';
       document.getElementById('ld-proposal').value       = lead.proposal || 'No';
+      document.getElementById('ld-poc').value            = lead.poc || 'No';
+      document.getElementById('ld-poc-date').value       = lead.pocDate || '';
       document.getElementById('ld-stage').value          = lead.stage || '';
       toggleLastMeetingDate();
+      togglePocDate();
     }
   } else {
-    ['ld-date','ld-company','ld-contact-person','ld-contact-no','ld-contact-post','ld-city','ld-last-meeting'].forEach(fid => {
+    ['ld-date','ld-company','ld-contact-person','ld-contact-no','ld-contact-post','ld-city','ld-last-meeting','ld-poc-date'].forEach(fid => {
       document.getElementById(fid).value = '';
     });
     document.getElementById('ld-meeting').value  = 'No';
     document.getElementById('ld-proposal').value = 'No';
+    document.getElementById('ld-poc').value      = 'No';
     document.getElementById('ld-stage').value    = '';
     // Default lead date to today
     document.getElementById('ld-date').value = todayISO();
     toggleLastMeetingDate();
+    togglePocDate();
   }
 }
 
@@ -3715,6 +3759,8 @@ function saveLeadFromModal() {
   const meeting  = document.getElementById('ld-meeting').value;
   const lastMtg  = document.getElementById('ld-last-meeting').value;
   const proposal = document.getElementById('ld-proposal').value;
+  const poc      = document.getElementById('ld-poc').value;
+  const pocDate  = poc === 'Yes' ? document.getElementById('ld-poc-date').value : '';
   const stage    = document.getElementById('ld-stage').value;
 
   const err = document.getElementById('lead-modal-error');
@@ -3730,14 +3776,14 @@ function saveLeadFromModal() {
   if (editId) {
     const idx = leads.findIndex(l => l.id === editId);
     if (idx > -1) {
-      leads[idx] = { ...leads[idx], date, company, contactPerson: person, contactNo: phone, contactPost: post, city, meeting, lastMeetingDate: lastMtg, proposal, stage };
+      leads[idx] = { ...leads[idx], date, company, contactPerson: person, contactNo: phone, contactPost: post, city, meeting, lastMeetingDate: lastMtg, proposal, stage, poc, pocDate };
       saveLeads(leads);
       closeLeadModal();
       renderLeadList();
       showToast('Lead updated successfully.', 'success');
     }
   } else {
-    leads.unshift({ id: genLeadId(), date, company, contactPerson: person, contactNo: phone, contactPost: post, city, meeting, lastMeetingDate: lastMtg, proposal, stage, createdAt: new Date().toISOString(), createdBy: currentUser.id });
+    leads.unshift({ id: genLeadId(), date, company, contactPerson: person, contactNo: phone, contactPost: post, city, meeting, lastMeetingDate: lastMtg, proposal, stage, poc, pocDate, createdAt: new Date().toISOString(), createdBy: currentUser.id });
     saveLeads(leads);
     closeLeadModal();
     renderLeadList();
@@ -3811,13 +3857,15 @@ function renderLeadList() {
       <td>${yesNoBadge(l.meeting)}</td>
       <td style="color:var(--text-muted);">${l.meeting === 'Yes' && l.lastMeetingDate ? formatDate(l.lastMeetingDate) : '—'}</td>
       <td>${yesNoBadge(l.proposal)}</td>
+      <td>${yesNoBadge(l.poc || 'No')}</td>
+      <td style="color:var(--text-muted);">${l.poc === 'Yes' && l.pocDate ? formatDate(l.pocDate) : '—'}</td>
       <td>${leadStageBadge(l.stage)}</td>
       <td>
         <button class="btn btn-ghost btn-sm" onclick="openLeadModal('${escapeJs(l.id)}')">Edit</button>
         <button class="btn btn-danger btn-sm" onclick="confirmDeleteLead('${escapeJs(l.id)}')">Delete</button>
       </td>
     </tr>`).join('') :
-    `<tr><td colspan="12" style="text-align:center;padding:2.5rem;color:var(--text-muted);">No leads found. Add your first lead!</td></tr>`;
+    `<tr><td colspan="14" style="text-align:center;padding:2.5rem;color:var(--text-muted);">No leads found. Add your first lead!</td></tr>`;
 
   // Pagination
   const totalPages = Math.ceil(total / ROWS_PER_PAGE) || 1;
